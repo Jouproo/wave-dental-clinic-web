@@ -1,6 +1,6 @@
 # Wave Dental Clinic — Landing Page
 
-A modern, premium dental clinic landing page built with **Next.js 14**, **TypeScript**, **Tailwind CSS**, and **Framer Motion**.
+A modern, premium dental clinic landing page built with **Next.js 15**, **TypeScript**, **Tailwind CSS**, and **Framer Motion**.
 
 🌐 **Domain:** [wavedentelclinic.com](https://wavedentelclinic.com)
 
@@ -30,7 +30,7 @@ A modern, premium dental clinic landing page built with **Next.js 14**, **TypeSc
 
 | Tool | Version |
 |------|---------|
-| Next.js | 14.2.3 |
+| Next.js | 15.5.16 |
 | TypeScript | 5.x |
 | Tailwind CSS | 3.4.x |
 | Framer Motion | 11.x |
