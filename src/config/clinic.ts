@@ -42,7 +42,7 @@ export const clinicConfig = {
     description:
       "ويف دنتال كلينيك في 6 أكتوبر، الجيزة — خدمات تقويم الأسنان، زراعة الأسنان، تجميل الأسنان، تبييض، وعلاج الجذور بأعلى معايير الجودة والتعقيم الطبي.",
     ogImage: "/images/og-image.jpg",
-    url: "https://wavedentalclinic.com",
+    url: "https://wavedentelclinic.com",
   },
 } as const;
 
