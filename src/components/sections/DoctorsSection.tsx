@@ -1,10 +1,10 @@
-import SectionHeader from "@/components/shared/SectionHeader";
+﻿import SectionHeader from "@/components/shared/SectionHeader";
 import DoctorCard from "@/components/shared/DoctorCard";
 import { doctors } from "@/data/doctors";
 
 export default function DoctorsSection() {
   return (
-    <section id="doctors" className="py-24 bg-gradient-to-br from-slate-50 to-teal-50">
+    <section id="doctors" className="py-24 bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeader
           badge="فريقنا الطبي"

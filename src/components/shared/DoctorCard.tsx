@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { UserCircle, Award, MessageCircle } from "lucide-react";
@@ -21,11 +21,11 @@ export default function DoctorCard({ doctor, index }: DoctorCardProps) {
       className="group bg-white rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-slate-100"
     >
       {/* Doctor image placeholder */}
-      <div className="h-52 bg-gradient-to-br from-teal-100 to-cyan-50 flex items-center justify-center relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-teal-500/10 to-cyan-500/10" />
-        <UserCircle className="w-28 h-28 text-teal-300" strokeWidth={1.2} />
+      <div className="h-52 bg-gradient-to-br from-blue-100 to-sky-50 flex items-center justify-center relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/10 to-sky-500/10" />
+        <UserCircle className="w-28 h-28 text-blue-300" strokeWidth={1.2} />
         {/* Experience badge */}
-        <span className="absolute top-4 left-4 bg-teal-600 text-white text-xs font-bold px-3 py-1 rounded-full">
+        <span className="absolute top-4 left-4 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">
           {doctor.experience}
         </span>
       </div>

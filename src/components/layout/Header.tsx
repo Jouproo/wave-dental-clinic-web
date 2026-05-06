@@ -1,8 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Phone } from "lucide-react";
+import Image from "next/image";
 import { clinicConfig, getWhatsAppUrl } from "@/config/clinic";
 
 const navLinks = [
@@ -39,7 +40,7 @@ export default function Header() {
         transition={{ duration: 0.6, ease: "easeOut" }}
         className={`fixed top-0 right-0 left-0 z-40 transition-all duration-300 ${
           scrolled
-            ? "bg-white/95 backdrop-blur-md shadow-md shadow-teal-900/5"
+            ? "bg-white/95 backdrop-blur-md shadow-md shadow-blue-900/5"
             : "bg-transparent"
         }`}
       >
@@ -52,12 +53,14 @@ export default function Header() {
               onClick={(e) => { e.preventDefault(); handleNavClick("#hero"); }}
               className="flex items-center gap-2 flex-shrink-0"
             >
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500 to-cyan-500 flex items-center justify-center shadow-md">
-                <span className="text-white text-lg font-black">ع</span>
-              </div>
-              <span className={`font-bold text-lg transition-colors ${scrolled ? "text-slate-800" : "text-white"}`}>
-                {clinicConfig.clinicName}
-              </span>
+              <Image
+                src="/images/logo.jpg"
+                alt="Wave Dental Clinic"
+                width={120}
+                height={40}
+                className={`h-10 w-auto object-contain transition-all ${scrolled ? "" : "brightness-0 invert"}`}
+                priority
+              />
             </a>
 
             {/* Desktop Nav */}
@@ -67,8 +70,8 @@ export default function Header() {
                   key={link.href}
                   href={link.href}
                   onClick={(e) => { e.preventDefault(); handleNavClick(link.href); }}
-                  className={`text-sm font-medium px-3 py-2 rounded-lg transition-all hover:bg-teal-50 hover:text-teal-700 ${
-                    scrolled ? "text-slate-600" : "text-white/90 hover:text-teal-700"
+                  className={`text-sm font-medium px-3 py-2 rounded-lg transition-all hover:bg-blue-50 hover:text-blue-700 ${
+                    scrolled ? "text-slate-600" : "text-white/90 hover:text-blue-700"
                   }`}
                 >
                   {link.label}
@@ -81,7 +84,7 @@ export default function Header() {
               <a
                 href={`tel:${clinicConfig.phoneNumber}`}
                 className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${
-                  scrolled ? "text-slate-600 hover:text-teal-600" : "text-white/90 hover:text-white"
+                  scrolled ? "text-slate-600 hover:text-blue-600" : "text-white/90 hover:text-white"
                 }`}
               >
                 <Phone className="w-4 h-4" />
@@ -93,7 +96,7 @@ export default function Header() {
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.96 }}
-                className="bg-gradient-to-l from-teal-600 to-cyan-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-teal-500/25 hover:shadow-teal-500/40 transition-shadow"
+                className="bg-gradient-to-l from-blue-600 to-sky-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-shadow"
               >
                 احجز الآن
               </motion.a>
@@ -134,7 +137,7 @@ export default function Header() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.05 }}
                   onClick={(e) => { e.preventDefault(); handleNavClick(link.href); }}
-                  className="text-slate-700 font-medium py-3 px-4 rounded-xl hover:bg-teal-50 hover:text-teal-700 transition-colors"
+                  className="text-slate-700 font-medium py-3 px-4 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition-colors"
                 >
                   {link.label}
                 </motion.a>
@@ -151,7 +154,7 @@ export default function Header() {
                   href={getWhatsAppUrl()}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-l from-teal-600 to-cyan-500 text-white font-bold"
+                  className="flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-l from-blue-600 to-sky-500 text-white font-bold"
                 >
                   احجز الآن
                 </a>

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -38,7 +38,7 @@ export default function SectionHeader({
             "inline-block text-sm font-semibold px-4 py-1.5 rounded-full mb-4",
             light
               ? "bg-white/20 text-white"
-              : "bg-teal-100 text-teal-700"
+              : "bg-blue-100 text-blue-700"
           )}
         >
           {badge}

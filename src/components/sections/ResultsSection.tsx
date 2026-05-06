@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { AlertCircle } from "lucide-react";
@@ -10,7 +10,7 @@ const cases = [
     treatment: "هوليوود سمايل",
     description: "تركيب قشور بورسلين لتغيير شكل ولون الأسنان بالكامل",
     tag: "تجميل الأسنان",
-    tagColor: "bg-teal-100 text-teal-700",
+    tagColor: "bg-blue-100 text-blue-700",
   },
   {
     id: 2,
@@ -71,7 +71,7 @@ export default function ResultsSection() {
               className="bg-white rounded-2xl overflow-hidden border border-slate-100 shadow-md hover:shadow-xl transition-all duration-300"
             >
               {/* Before/After placeholder */}
-              <div className="relative h-44 bg-gradient-to-br from-slate-100 to-teal-50 flex items-center justify-center">
+              <div className="relative h-44 bg-gradient-to-br from-slate-100 to-blue-50 flex items-center justify-center">
                 {/* Before section */}
                 <div className="absolute inset-0 flex">
                   <div className="flex-1 bg-slate-200 flex items-center justify-center">
@@ -87,10 +87,10 @@ export default function ResultsSection() {
                     </div>
                   </div>
                   {/* After section */}
-                  <div className="flex-1 bg-gradient-to-br from-teal-50 to-cyan-50 flex items-center justify-center">
+                  <div className="flex-1 bg-gradient-to-br from-blue-50 to-sky-50 flex items-center justify-center">
                     <div className="text-center">
                       <span className="text-4xl">😁</span>
-                      <p className="text-xs text-teal-600 mt-1 font-medium">بعد</p>
+                      <p className="text-xs text-blue-600 mt-1 font-medium">بعد</p>
                     </div>
                   </div>
                 </div>

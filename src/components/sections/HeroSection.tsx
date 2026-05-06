@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { MessageCircle, MapPin, CheckCircle, Sparkles } from "lucide-react";
@@ -21,13 +21,13 @@ export default function HeroSection() {
   return (
     <section
       id="hero"
-      className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-slate-900 via-teal-900 to-slate-900"
+      className="relative min-h-screen flex items-center overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900"
     >
       {/* Background decorations */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-teal-500/20 rounded-full blur-3xl" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-cyan-500/15 rounded-full blur-3xl" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-teal-600/5 rounded-full blur-3xl" />
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-blue-500/20 rounded-full blur-3xl" />
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-sky-500/15 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-blue-600/5 rounded-full blur-3xl" />
         {/* Grid pattern overlay */}
         <div
           className="absolute inset-0 opacity-[0.03]"
@@ -63,7 +63,7 @@ export default function HeroSection() {
               className="text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight mb-6"
             >
               ابتسامتك تبدأ من{" "}
-              <span className="bg-gradient-to-l from-teal-300 to-cyan-300 bg-clip-text text-transparent">
+              <span className="bg-gradient-to-l from-blue-300 to-sky-300 bg-clip-text text-transparent">
                 عيادة تهتم
               </span>{" "}
               بكل تفصيلة
@@ -121,7 +121,7 @@ export default function HeroSection() {
             >
               {trustPoints.map((pt) => (
                 <div key={pt.label} className="flex items-center gap-1.5 text-white/70 text-sm">
-                  <pt.icon className="w-4 h-4 text-teal-400 flex-shrink-0" />
+                  <pt.icon className="w-4 h-4 text-blue-400 flex-shrink-0" />
                   <span>{pt.label}</span>
                 </div>
               ))}
@@ -142,7 +142,7 @@ export default function HeroSection() {
                 {/* Dental icon visualization */}
                 <div className="w-full aspect-square max-w-xs mx-auto flex items-center justify-center relative">
                   {/* Center tooth icon */}
-                  <div className="w-40 h-40 bg-gradient-to-br from-teal-400 to-cyan-500 rounded-3xl flex items-center justify-center shadow-2xl shadow-teal-500/40">
+                  <div className="w-40 h-40 bg-gradient-to-br from-blue-400 to-sky-500 rounded-3xl flex items-center justify-center shadow-2xl shadow-blue-500/40">
                     <span className="text-7xl">🦷</span>
                   </div>
 

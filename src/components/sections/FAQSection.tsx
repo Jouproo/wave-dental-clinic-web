@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -16,11 +16,11 @@ function FAQItem({ question, answer, index }: { question: string; answer: string
       viewport={{ once: true }}
       transition={{ duration: 0.45, delay: index * 0.07 }}
       className={`border rounded-2xl overflow-hidden transition-all duration-300 ${
-        open ? "border-teal-200 shadow-md shadow-teal-100" : "border-slate-100 shadow-sm"
+        open ? "border-blue-200 shadow-md shadow-blue-100" : "border-slate-100 shadow-sm"
       }`}
     >
       <button
-        className="w-full flex items-center justify-between gap-4 px-6 py-5 text-right bg-white hover:bg-teal-50/50 transition-colors"
+        className="w-full flex items-center justify-between gap-4 px-6 py-5 text-right bg-white hover:bg-blue-50/50 transition-colors"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
       >
@@ -28,9 +28,9 @@ function FAQItem({ question, answer, index }: { question: string; answer: string
         <motion.div
           animate={{ rotate: open ? 180 : 0 }}
           transition={{ duration: 0.25 }}
-          className="flex-shrink-0 w-8 h-8 rounded-full bg-teal-100 flex items-center justify-center"
+          className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center"
         >
-          <ChevronDown className="w-4 h-4 text-teal-600" />
+          <ChevronDown className="w-4 h-4 text-blue-600" />
         </motion.div>
       </button>
 

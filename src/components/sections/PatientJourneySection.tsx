@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import {
@@ -16,14 +16,14 @@ const steps = [
     icon: MessageCircle,
     title: "تواصل معنا",
     description: "تواصل معنا عبر واتساب أو اتصل بنا لمعرفة المزيد عن خدماتنا وحجز موعد.",
-    color: "from-teal-500 to-cyan-500",
+    color: "from-blue-500 to-sky-500",
   },
   {
     step: "02",
     icon: CalendarCheck,
     title: "احجز موعدك",
     description: "اختر الوقت المناسب لك من جدول مواعيدنا المرن وخصص موعدك بكل سهولة.",
-    color: "from-blue-500 to-cyan-500",
+    color: "from-blue-500 to-sky-500",
   },
   {
     step: "03",
@@ -44,7 +44,7 @@ const steps = [
     icon: HeartHandshake,
     title: "متابعة بعد العلاج",
     description: "لا تنتهي رحلتنا عند انتهاء العلاج، نتابع معك للتأكد من راحتك ونتيجة العلاج.",
-    color: "from-green-500 to-teal-500",
+    color: "from-green-500 to-blue-500",
   },
 ];
 
@@ -61,7 +61,7 @@ export default function PatientJourneySection() {
         {/* Desktop timeline */}
         <div className="hidden md:flex items-start gap-0 relative">
           {/* Connecting line */}
-          <div className="absolute top-10 right-[10%] left-[10%] h-0.5 bg-gradient-to-l from-teal-200 to-teal-500 z-0" />
+          <div className="absolute top-10 right-[10%] left-[10%] h-0.5 bg-gradient-to-l from-blue-200 to-blue-500 z-0" />
 
           {steps.map((step, i) => (
             <motion.div
@@ -87,7 +87,7 @@ export default function PatientJourneySection() {
         {/* Mobile vertical timeline */}
         <div className="md:hidden flex flex-col gap-0 relative">
           {/* Vertical line */}
-          <div className="absolute top-5 bottom-5 right-9 w-0.5 bg-gradient-to-b from-teal-500 to-teal-200 z-0" />
+          <div className="absolute top-5 bottom-5 right-9 w-0.5 bg-gradient-to-b from-blue-500 to-blue-200 z-0" />
 
           {steps.map((step, i) => (
             <motion.div

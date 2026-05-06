@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { CalendarCheck, MessageCircle } from "lucide-react";
@@ -11,7 +11,7 @@ export default function BookingSection() {
   const isExternalBooking = Boolean(clinicConfig.bookingUrl);
 
   return (
-    <section id="booking" className="py-24 bg-gradient-to-br from-teal-600 to-cyan-600 relative overflow-hidden">
+    <section id="booking" className="py-24 bg-gradient-to-br from-blue-600 to-sky-600 relative overflow-hidden">
       {/* Background decorations */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute -top-20 -right-20 w-72 h-72 bg-white/5 rounded-full blur-3xl" />
@@ -45,7 +45,7 @@ export default function BookingSection() {
               rel="noopener noreferrer"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.96 }}
-              className="flex items-center justify-center gap-2 bg-white text-teal-700 font-black px-8 py-4 rounded-xl shadow-xl hover:bg-teal-50 transition-colors text-lg"
+              className="flex items-center justify-center gap-2 bg-white text-blue-700 font-black px-8 py-4 rounded-xl shadow-xl hover:bg-blue-50 transition-colors text-lg"
             >
               {isExternalBooking ? (
                 <>

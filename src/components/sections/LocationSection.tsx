@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { MapPin, Phone, MessageCircle, Navigation, Clock } from "lucide-react";
@@ -37,8 +37,8 @@ export default function LocationSection() {
                 title="موقع العيادة على خرائط جوجل"
               />
             ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 to-teal-50 text-slate-400">
-                <MapPin className="w-16 h-16 mb-3 text-teal-300" />
+              <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 to-blue-50 text-slate-400">
+                <MapPin className="w-16 h-16 mb-3 text-blue-300" />
                 <p className="font-medium text-slate-500">سيتم تحديث موقع العيادة قريبًا</p>
                 <p className="text-sm text-slate-400 mt-1">{clinicConfig.address}</p>
               </div>
@@ -54,9 +54,9 @@ export default function LocationSection() {
             className="flex flex-col gap-5"
           >
             {/* Address card */}
-            <div className="bg-gradient-to-br from-teal-50 to-cyan-50 rounded-2xl p-5 border border-teal-100">
+            <div className="bg-gradient-to-br from-blue-50 to-sky-50 rounded-2xl p-5 border border-blue-100">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-teal-500 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center flex-shrink-0">
                   <MapPin className="w-5 h-5 text-white" />
                 </div>
                 <div>
@@ -85,7 +85,7 @@ export default function LocationSection() {
                 href={clinicConfig.googleMapsDirectionUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-center gap-2 bg-gradient-to-l from-teal-600 to-cyan-500 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-shadow"
+                className="flex items-center justify-center gap-2 bg-gradient-to-l from-blue-600 to-sky-500 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-shadow"
               >
                 <Navigation className="w-5 h-5" />
                 افتح الموقع على Google Maps

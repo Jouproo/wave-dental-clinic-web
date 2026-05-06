@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { Star, Quote } from "lucide-react";
@@ -16,10 +16,10 @@ export default function TestimonialCard({ testimonial, index }: TestimonialCardP
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay: index * 0.08 }}
-      className="bg-white rounded-2xl p-6 shadow-md border border-slate-100 hover:shadow-lg hover:border-teal-200 transition-all duration-300 flex flex-col"
+      className="bg-white rounded-2xl p-6 shadow-md border border-slate-100 hover:shadow-lg hover:border-blue-200 transition-all duration-300 flex flex-col"
     >
       {/* Quote icon */}
-      <Quote className="w-8 h-8 text-teal-200 mb-3 flex-shrink-0" />
+      <Quote className="w-8 h-8 text-blue-200 mb-3 flex-shrink-0" />
 
       {/* Stars */}
       <div className="flex gap-0.5 mb-3">
@@ -32,12 +32,12 @@ export default function TestimonialCard({ testimonial, index }: TestimonialCardP
 
       {/* Author */}
       <div className="flex items-center gap-3 pt-4 border-t border-slate-100">
-        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-teal-400 to-cyan-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-sky-500 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
           {testimonial.avatar}
         </div>
         <div>
           <p className="font-semibold text-slate-800 text-sm">{testimonial.name}</p>
-          <p className="text-xs text-teal-600">{testimonial.treatment}</p>
+          <p className="text-xs text-blue-600">{testimonial.treatment}</p>
         </div>
       </div>
     </motion.div>

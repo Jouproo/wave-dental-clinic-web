@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { Award, ClipboardList, ShieldCheck, Cpu, MessageCircle, Heart } from "lucide-react";
@@ -24,8 +24,8 @@ const benefits = [
     icon: ShieldCheck,
     title: "تعقيم واهتمام بالتفاصيل",
     description: "نتبع أعلى معايير التعقيم الطبي الدولية لضمان سلامتك.",
-    color: "text-teal-500",
-    bg: "bg-teal-50",
+    color: "text-blue-500",
+    bg: "bg-blue-50",
   },
   {
     icon: Cpu,
@@ -52,7 +52,7 @@ const benefits = [
 
 export default function WhyChooseUsSection() {
   return (
-    <section id="why-us" className="py-24 bg-gradient-to-br from-slate-50 to-teal-50">
+    <section id="why-us" className="py-24 bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Left: Text */}
@@ -62,12 +62,12 @@ export default function WhyChooseUsSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
           >
-            <span className="inline-block text-sm font-semibold px-4 py-1.5 rounded-full bg-teal-100 text-teal-700 mb-4">
+            <span className="inline-block text-sm font-semibold px-4 py-1.5 rounded-full bg-blue-100 text-blue-700 mb-4">
               لماذا تختارنا؟
             </span>
             <h2 className="text-3xl md:text-4xl font-black text-slate-800 leading-tight mb-5">
               نحن لا نعالج فقط —{" "}
-              <span className="text-teal-600">نبني ثقتك</span>
+              <span className="text-blue-600">نبني ثقتك</span>
             </h2>
             <p className="text-slate-500 leading-relaxed mb-8 text-lg">
               عيادتنا ليست مجرد مكان للعلاج، هي تجربة متكاملة تبدأ من الاستقبال
@@ -83,7 +83,7 @@ export default function WhyChooseUsSection() {
                 { num: "3", label: "أطباء متخصصون" },
               ].map((s) => (
                 <div key={s.label} className="text-center">
-                  <div className="text-3xl font-black text-teal-600">{s.num}</div>
+                  <div className="text-3xl font-black text-blue-600">{s.num}</div>
                   <div className="text-slate-500 text-sm">{s.label}</div>
                 </div>
               ))}
@@ -95,7 +95,7 @@ export default function WhyChooseUsSection() {
               rel="noopener noreferrer"
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
-              className="inline-flex items-center gap-2 bg-gradient-to-l from-teal-600 to-cyan-500 text-white font-bold px-7 py-4 rounded-xl shadow-lg shadow-teal-500/25 hover:shadow-teal-500/40 transition-shadow"
+              className="inline-flex items-center gap-2 bg-gradient-to-l from-blue-600 to-sky-500 text-white font-bold px-7 py-4 rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-shadow"
             >
               احجز موعدك الآن
             </motion.a>

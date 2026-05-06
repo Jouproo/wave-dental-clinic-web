@@ -14,14 +14,16 @@ export const metadata: Metadata = {
   title: clinicConfig.seo.title,
   description: clinicConfig.seo.description,
   keywords: [
-    "عيادة أسنان",
+    "ويف دنتال كلينيك",
+    "Wave Dental Clinic",
+    "عيادة أسنان 6 أكتوبر",
+    "طبيب أسنان الجيزة",
     "تقويم أسنان",
     "زراعة أسنان",
     "تجميل أسنان",
     "هوليوود سمايل",
     "تبييض أسنان",
     "حجز موعد أسنان",
-    "طبيب أسنان",
   ],
   authors: [{ name: clinicConfig.clinicName }],
   openGraph: {

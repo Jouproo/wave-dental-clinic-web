@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -18,15 +18,15 @@ interface CTAButtonProps {
 
 const variantClasses = {
   primary:
-    "bg-gradient-to-l from-teal-600 to-cyan-500 text-white shadow-lg shadow-teal-500/30 hover:shadow-teal-500/50 hover:from-teal-700 hover:to-cyan-600",
+    "bg-gradient-to-l from-blue-600 to-sky-500 text-white shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:from-blue-700 hover:to-sky-600",
   secondary:
-    "bg-white text-teal-700 border border-teal-200 shadow-md hover:bg-teal-50 hover:shadow-lg",
+    "bg-white text-blue-700 border border-blue-200 shadow-md hover:bg-blue-50 hover:shadow-lg",
   outline:
-    "bg-transparent text-white border-2 border-white hover:bg-white hover:text-teal-700",
+    "bg-transparent text-white border-2 border-white hover:bg-white hover:text-blue-700",
   whatsapp:
     "bg-gradient-to-l from-green-600 to-green-500 text-white shadow-lg shadow-green-500/30 hover:from-green-700 hover:to-green-600",
   ghost:
-    "bg-transparent text-teal-700 hover:bg-teal-50",
+    "bg-transparent text-blue-700 hover:bg-blue-50",
 };
 
 const sizeClasses = {
