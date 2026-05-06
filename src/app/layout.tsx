@@ -11,6 +11,7 @@ const cairo = Cairo({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(clinicConfig.seo.url),
   title: clinicConfig.seo.title,
   description: clinicConfig.seo.description,
   keywords: [
