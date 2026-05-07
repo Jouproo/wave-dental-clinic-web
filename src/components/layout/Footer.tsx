@@ -14,10 +14,10 @@ export default function Footer() {
           <div className="lg:col-span-1">
             <div className="mb-4">
               <Image
-                src="/images/logo.jpg"
+                src="/images/web_logo.png"
                 alt="Wave Dental Clinic"
-                width={150}
-                height={50}
+                width={160}
+                height={52}
                 className="h-12 w-auto object-contain brightness-0 invert"
               />
             </div>

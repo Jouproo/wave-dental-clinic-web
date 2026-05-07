@@ -54,11 +54,11 @@ export default function Header() {
               className="flex items-center gap-2 flex-shrink-0"
             >
               <Image
-                src="/images/logo.jpg"
+                src="/images/web_logo.png"
                 alt="Wave Dental Clinic"
-                width={120}
-                height={40}
-                className={`h-10 w-auto object-contain transition-all ${scrolled ? "" : "brightness-0 invert"}`}
+                width={140}
+                height={44}
+                className={`h-11 w-auto object-contain transition-all ${scrolled ? "" : "brightness-0 invert"}`}
                 priority
               />
             </a>

@@ -23,7 +23,7 @@ export const clinicConfig = {
   // Google Maps
   googleMapsEmbedUrl:
     "https://maps.google.com/maps?q=6+October+City,Giza,Egypt&output=embed",
-  googleMapsDirectionUrl: "https://maps.app.goo.gl/7nWhdSEGf9y9Ei3J8",
+  googleMapsDirectionUrl: "https://maps.app.goo.gl/WWvmsKun7v28EWUx9",
 
   // Booking — change this later to your booking system URL
   bookingUrl: "",
