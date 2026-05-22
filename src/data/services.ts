@@ -4,6 +4,11 @@ export interface Service {
   title: string;
   description: string;
   shortCta: string;
+  // DB-extended fields
+  short_cta?: string;
+  detail_description?: string;
+  status?: "active" | "inactive";
+  display_order?: number;
 }
 
 export const services: Service[] = [

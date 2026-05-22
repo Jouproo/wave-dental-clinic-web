@@ -4,7 +4,11 @@ export interface Doctor {
   specialty: string;
   bio: string;
   image: string; // path or placeholder
+  image_url?: string | null; // Supabase Storage URL (takes precedence over image)
   experience: string;
+  whatsapp?: string;
+  status?: "active" | "inactive";
+  display_order?: number;
 }
 
 export const doctors: Doctor[] = [

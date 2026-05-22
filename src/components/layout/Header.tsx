@@ -1,10 +1,12 @@
-﻿"use client";
+"use client";
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Phone } from "lucide-react";
 import Image from "next/image";
-import { clinicConfig, getWhatsAppUrl } from "@/config/clinic";
+import { clinicConfig } from "@/config/clinic";
+import { makeWhatsAppUrl, defaultSettings } from "@/lib/clinic-settings";
+import type { DbClinicSettings } from "@/types/admin";
 
 const navLinks = [
   { label: "الرئيسية", href: "#hero" },
@@ -16,9 +18,16 @@ const navLinks = [
   { label: "تواصل معنا", href: "#contact" },
 ];
 
-export default function Header() {
+interface HeaderProps {
+  settings?: DbClinicSettings;
+}
+
+export default function Header({ settings = defaultSettings }: HeaderProps) {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  const phone = settings.phone || clinicConfig.phoneNumber;
+  const whatsappUrl = makeWhatsAppUrl(settings.whatsapp || clinicConfig.whatsappNumber);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -82,16 +91,16 @@ export default function Header() {
             {/* CTA */}
             <div className="hidden lg:flex items-center gap-3">
               <a
-                href={`tel:${clinicConfig.phoneNumber}`}
+                href={`tel:${phone}`}
                 className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${
                   scrolled ? "text-slate-600 hover:text-blue-600" : "text-white/90 hover:text-white"
                 }`}
               >
                 <Phone className="w-4 h-4" />
-                <span>{clinicConfig.phoneNumber}</span>
+                <span>{phone}</span>
               </a>
               <motion.a
-                href={getWhatsAppUrl()}
+                href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.04 }}
@@ -144,14 +153,14 @@ export default function Header() {
               ))}
               <div className="mt-3 pt-3 border-t border-slate-100 flex flex-col gap-2">
                 <a
-                  href={`tel:${clinicConfig.phoneNumber}`}
+                  href={`tel:${phone}`}
                   className="flex items-center justify-center gap-2 py-3 rounded-xl bg-slate-50 text-slate-700 font-medium"
                 >
                   <Phone className="w-4 h-4" />
-                  {clinicConfig.phoneNumber}
+                  {phone}
                 </a>
                 <a
-                  href={getWhatsAppUrl()}
+                  href={whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-l from-blue-600 to-sky-500 text-white font-bold"

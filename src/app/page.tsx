@@ -12,11 +12,14 @@ import LocationSection from "@/components/sections/LocationSection";
 import BookingSection from "@/components/sections/BookingSection";
 import FAQSection from "@/components/sections/FAQSection";
 import FinalCTASection from "@/components/sections/FinalCTASection";
+import { getClinicSettings } from "@/lib/clinic-settings";
 
-export default function Home() {
+export default async function Home() {
+  const settings = await getClinicSettings();
+
   return (
     <>
-      <Header />
+      <Header settings={settings} />
       <main>
         <HeroSection />
         <ServicesSection />
@@ -25,13 +28,13 @@ export default function Home() {
         <DoctorsSection />
         <ResultsSection />
         <TestimonialsSection />
-        <LocationSection />
+        <LocationSection settings={settings} />
         <BookingSection />
         <FAQSection />
         <FinalCTASection />
       </main>
-      <Footer />
-      <FloatingWhatsAppButton />
+      <Footer settings={settings} />
+      <FloatingWhatsAppButton whatsapp={settings.whatsapp} />
     </>
   );
 }

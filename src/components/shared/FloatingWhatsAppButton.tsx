@@ -2,11 +2,17 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
-import { MessageCircle, X } from "lucide-react";
-import { getWhatsAppUrl, clinicConfig } from "@/config/clinic";
+import { MessageCircle } from "lucide-react";
+import { clinicConfig } from "@/config/clinic";
+import { makeWhatsAppUrl } from "@/lib/clinic-settings";
 
-export default function FloatingWhatsAppButton() {
+interface FloatingWhatsAppButtonProps {
+  whatsapp?: string;
+}
+
+export default function FloatingWhatsAppButton({ whatsapp }: FloatingWhatsAppButtonProps) {
   const [showTooltip, setShowTooltip] = useState(false);
+  const url = makeWhatsAppUrl(whatsapp || clinicConfig.whatsappNumber);
 
   return (
     <div className="fixed bottom-6 left-6 z-50 flex flex-col items-start gap-2">
@@ -28,7 +34,7 @@ export default function FloatingWhatsAppButton() {
       </AnimatePresence>
 
       <motion.a
-        href={getWhatsAppUrl()}
+        href={url}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="تواصل معنا على واتساب"
@@ -41,7 +47,6 @@ export default function FloatingWhatsAppButton() {
         whileTap={{ scale: 0.95 }}
         className="relative w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-full shadow-lg shadow-green-500/40 flex items-center justify-center hover:shadow-green-500/60 transition-shadow"
       >
-        {/* Pulse ring */}
         <span className="absolute inset-0 rounded-full bg-green-400 animate-ping opacity-30" />
         <MessageCircle className="w-7 h-7 text-white" fill="white" />
       </motion.a>
