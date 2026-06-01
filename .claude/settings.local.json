@@ -1,7 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "PowerShell($path = \"C:\\\\Users\\\\User\\\\AppData\\\\Local\\\\Packages\\\\Claude_pzs8sxrjxfjjc\\\\LocalCache\\\\Roaming\\\\Claude\\\\local-agent-mode-sessions\\\\befbf871-3e98-492c-b21b-313a98887b54\\\\0cd4a2f3-a72b-449c-96bf-bf2e438a3a7c\\\\local_ce1f970f-4674-4bda-ba6d-8a543a0e3225\\\\outputs\\\\dental-clinic\"; $path.Length)"
-    ]
-  }
-}

@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
+import { Eye, EyeOff, Loader2, ShieldCheck, Mail, Lock } from "lucide-react";
 
 export default function AdminLoginPage() {
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
@@ -19,13 +20,13 @@ export default function AdminLoginPage() {
       const res = await fetch("/api/admin/auth", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ password }),
+        body: JSON.stringify({ email, password }),
       });
       if (res.ok) {
         router.replace("/admin");
       } else {
         const data = await res.json();
-        setError(data.error ?? "كلمة المرور غير صحيحة");
+        setError(data.error ?? "البريد الإلكتروني أو كلمة المرور غير صحيحة");
       }
     } catch {
       setError("تعذّر الاتصال بالخادم، حاول مرة أخرى");
@@ -39,9 +40,9 @@ export default function AdminLoginPage() {
       className="min-h-screen flex items-center justify-center px-4"
       style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e3a5f 50%, #0f172a 100%)" }}
     >
-      {/* Subtle grid overlay */}
+      {/* Grid overlay */}
       <div
-        className="absolute inset-0 opacity-5"
+        className="absolute inset-0 opacity-5 pointer-events-none"
         style={{
           backgroundImage:
             "linear-gradient(rgba(255,255,255,0.15) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.15) 1px, transparent 1px)",
@@ -50,15 +51,13 @@ export default function AdminLoginPage() {
       />
 
       <div className="relative w-full max-w-md">
-        {/* Card */}
         <div className="bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl overflow-hidden">
-          {/* Top accent bar */}
+          {/* Accent bar */}
           <div className="h-1.5 bg-gradient-to-r from-blue-600 via-sky-400 to-blue-600" />
 
           <div className="px-8 pt-8 pb-9">
             {/* Header */}
             <div className="flex flex-col items-center mb-8">
-              {/* Logo mark */}
               <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-sky-500 flex items-center justify-center shadow-lg shadow-blue-500/30 mb-4">
                 <span className="text-white text-3xl font-black leading-none">W</span>
               </div>
@@ -78,6 +77,27 @@ export default function AdminLoginPage() {
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-4" dir="rtl">
+              {/* Email */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-600 mb-2">
+                  البريد الإلكتروني
+                </label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="w-full border-2 border-slate-200 rounded-xl px-4 py-3.5 text-slate-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all pl-11 placeholder:text-slate-300"
+                    placeholder="admin@clinic.com"
+                    autoFocus
+                    autoComplete="email"
+                    dir="ltr"
+                  />
+                  <Mail className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-350 pointer-events-none text-slate-400" />
+                </div>
+              </div>
+
+              {/* Password */}
               <div>
                 <label className="block text-sm font-semibold text-slate-600 mb-2">
                   كلمة المرور
@@ -87,20 +107,22 @@ export default function AdminLoginPage() {
                     type={showPw ? "text" : "password"}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full border-2 border-slate-200 rounded-xl px-4 py-3.5 text-slate-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all pr-4 pl-11 placeholder:text-slate-300"
-                    placeholder="••••••••••••"
+                    className="w-full border-2 border-slate-200 rounded-xl px-4 py-3.5 text-slate-800 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all pr-4 pl-20 placeholder:text-slate-300"
+                    placeholder="••••••••••"
                     required
-                    autoFocus
                     autoComplete="current-password"
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPw(!showPw)}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded-lg transition-colors"
-                    tabIndex={-1}
-                  >
-                    {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
+                  <div className="absolute left-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setShowPw(!showPw)}
+                      className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg transition-colors"
+                      tabIndex={-1}
+                    >
+                      {showPw ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                    <Lock className="w-4 h-4 text-slate-300" />
+                  </div>
                 </div>
               </div>
 
@@ -114,7 +136,6 @@ export default function AdminLoginPage() {
                 </div>
               )}
 
-              {/* Submit */}
               <button
                 type="submit"
                 disabled={loading || !password}
@@ -133,7 +154,6 @@ export default function AdminLoginPage() {
           </div>
         </div>
 
-        {/* Footer note */}
         <p className="text-center text-xs text-white/30 mt-5">
           © {new Date().getFullYear()} Wave Dental Clinic — Admin Portal
         </p>

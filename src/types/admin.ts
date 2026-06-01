@@ -43,6 +43,14 @@ export interface DbServiceWithGallery extends DbService {
   gallery: DbGallery[];
 }
 
+export interface DbAdminUser {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  created_at: string;
+}
+
 export interface DbClinicSettings {
   id: number;
   phone: string;

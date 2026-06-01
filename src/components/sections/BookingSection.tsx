@@ -1,18 +1,22 @@
-﻿"use client";
+"use client";
 
 import { motion } from "framer-motion";
 import { CalendarCheck, MessageCircle } from "lucide-react";
-import { getBookingUrl, getWhatsAppUrl, clinicConfig } from "@/config/clinic";
+import { clinicConfig } from "@/config/clinic";
+import { makeWhatsAppUrl, defaultSettings } from "@/lib/clinic-settings";
+import type { DbClinicSettings } from "@/types/admin";
 
-export default function BookingSection() {
-  // When bookingUrl is set in config, it points to external booking system.
-  // Otherwise falls back to WhatsApp.
-  const primaryBookingUrl = getBookingUrl();
+interface BookingSectionProps {
+  settings?: DbClinicSettings;
+}
+
+export default function BookingSection({ settings = defaultSettings }: BookingSectionProps) {
+  const whatsappUrl = makeWhatsAppUrl(settings.whatsapp || clinicConfig.whatsappNumber);
   const isExternalBooking = Boolean(clinicConfig.bookingUrl);
+  const primaryBookingUrl = clinicConfig.bookingUrl || whatsappUrl;
 
   return (
     <section id="booking" className="py-24 bg-gradient-to-br from-blue-600 to-sky-600 relative overflow-hidden">
-      {/* Background decorations */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute -top-20 -right-20 w-72 h-72 bg-white/5 rounded-full blur-3xl" />
         <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-white/5 rounded-full blur-3xl" />
@@ -29,9 +33,7 @@ export default function BookingSection() {
             <CalendarCheck className="w-8 h-8 text-white" />
           </div>
 
-          <h2 className="text-3xl md:text-4xl font-black text-white mb-4">
-            احجز موعدك الآن
-          </h2>
+          <h2 className="text-3xl md:text-4xl font-black text-white mb-4">احجز موعدك الآن</h2>
           <p className="text-white/80 text-lg mb-8 leading-relaxed">
             {isExternalBooking
               ? "احجز موعدك بسهولة عبر نظام الحجز الإلكتروني الخاص بنا."
@@ -41,28 +43,22 @@ export default function BookingSection() {
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <motion.a
               href={primaryBookingUrl}
-              target={isExternalBooking ? "_blank" : "_blank"}
+              target="_blank"
               rel="noopener noreferrer"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.96 }}
               className="flex items-center justify-center gap-2 bg-white text-blue-700 font-black px-8 py-4 rounded-xl shadow-xl hover:bg-blue-50 transition-colors text-lg"
             >
               {isExternalBooking ? (
-                <>
-                  <CalendarCheck className="w-5 h-5" />
-                  احجز موعدك الآن
-                </>
+                <><CalendarCheck className="w-5 h-5" />احجز موعدك الآن</>
               ) : (
-                <>
-                  <MessageCircle className="w-5 h-5" />
-                  احجز عبر واتساب
-                </>
+                <><MessageCircle className="w-5 h-5" />احجز عبر واتساب</>
               )}
             </motion.a>
 
             {isExternalBooking && (
               <motion.a
-                href={getWhatsAppUrl()}
+                href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.05 }}
@@ -75,9 +71,7 @@ export default function BookingSection() {
             )}
           </div>
 
-          <p className="text-white/60 text-sm mt-6">
-            * نرد على رسائل الواتساب خلال دقائق أيام العمل
-          </p>
+          <p className="text-white/60 text-sm mt-6">* نرد على رسائل الواتساب خلال دقائق أيام العمل</p>
         </motion.div>
       </div>
     </section>

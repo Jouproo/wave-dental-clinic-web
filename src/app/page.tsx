@@ -31,9 +31,9 @@ export default async function Home() {
         <ResultsSection />
         <TestimonialsSection />
         <LocationSection settings={settings} />
-        <BookingSection />
+        <BookingSection settings={settings} />
         <FAQSection />
-        <FinalCTASection />
+        <FinalCTASection settings={settings} />
       </main>
       <Footer settings={settings} />
       <FloatingWhatsAppButton whatsapp={settings.whatsapp} />

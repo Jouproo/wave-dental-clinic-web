@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Home, Image, UserRound, Stethoscope, LogOut, Settings } from "lucide-react";
+import { Home, Image, UserRound, Stethoscope, LogOut, Settings, Users } from "lucide-react";
 import { clsx } from "clsx";
 
 const navItems = [
@@ -11,6 +11,7 @@ const navItems = [
   { href: "/admin/doctors", label: "الأطباء", icon: UserRound, exact: false },
   { href: "/admin/services", label: "الخدمات", icon: Stethoscope, exact: false },
   { href: "/admin/clinic", label: "العيادة", icon: Settings, exact: false },
+  { href: "/admin/members", label: "المسؤولون", icon: Users, exact: false },
 ];
 
 export default function AdminSidebar() {
@@ -33,7 +34,7 @@ export default function AdminSidebar() {
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-1">
         {navItems.map(({ href, label, icon: Icon, exact }) => {
-          const active = exact ? pathname === href : pathname.startsWith(href) && !(exact && pathname !== href);
+          const active = exact ? pathname === href : pathname.startsWith(href);
           return (
             <Link
               key={href}

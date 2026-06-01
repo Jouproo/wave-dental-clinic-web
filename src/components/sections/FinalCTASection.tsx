@@ -1,13 +1,22 @@
-﻿"use client";
+"use client";
 
 import { motion } from "framer-motion";
 import { MessageCircle, MapPin, CalendarCheck, Sparkles } from "lucide-react";
-import { getWhatsAppUrl, getBookingUrl, clinicConfig } from "@/config/clinic";
+import { clinicConfig } from "@/config/clinic";
+import { makeWhatsAppUrl, defaultSettings } from "@/lib/clinic-settings";
+import type { DbClinicSettings } from "@/types/admin";
 
-export default function FinalCTASection() {
+interface FinalCTASectionProps {
+  settings?: DbClinicSettings;
+}
+
+export default function FinalCTASection({ settings = defaultSettings }: FinalCTASectionProps) {
+  const whatsappUrl = makeWhatsAppUrl(settings.whatsapp || clinicConfig.whatsappNumber);
+  const mapsUrl = settings.google_maps_direction_url || clinicConfig.googleMapsDirectionUrl;
+  const bookingUrl = clinicConfig.bookingUrl || whatsappUrl;
+
   return (
     <section className="py-24 bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 relative overflow-hidden">
-      {/* Decorations */}
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl" />
         <div className="absolute bottom-0 left-1/4 w-96 h-96 bg-sky-500/10 rounded-full blur-3xl" />
@@ -33,13 +42,12 @@ export default function FinalCTASection() {
           </h2>
 
           <p className="text-white/70 text-lg mb-10 max-w-xl mx-auto leading-relaxed">
-            لا تأجل قرار صحة أسنانك. فريقنا جاهز لمساعدتك الآن وتقديم أفضل
-            تجربة علاجية تستحقها.
+            لا تأجل قرار صحة أسنانك. فريقنا جاهز لمساعدتك الآن وتقديم أفضل تجربة علاجية تستحقها.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center flex-wrap">
             <motion.a
-              href={getWhatsAppUrl()}
+              href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
               whileHover={{ scale: 1.06 }}
@@ -51,7 +59,7 @@ export default function FinalCTASection() {
             </motion.a>
 
             <motion.a
-              href={clinicConfig.googleMapsDirectionUrl}
+              href={mapsUrl}
               target="_blank"
               rel="noopener noreferrer"
               whileHover={{ scale: 1.06 }}
@@ -63,7 +71,7 @@ export default function FinalCTASection() {
             </motion.a>
 
             <motion.a
-              href={getBookingUrl()}
+              href={bookingUrl}
               target="_blank"
               rel="noopener noreferrer"
               whileHover={{ scale: 1.06 }}
