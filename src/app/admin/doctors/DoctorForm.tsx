@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Upload, Loader2, UserCircle } from "lucide-react";
+import { Upload, Loader2, UserCircle, CheckCircle2 } from "lucide-react";
 import Image from "next/image";
 import type { DbDoctor } from "@/types/admin";
 
@@ -39,6 +39,7 @@ export default function DoctorForm({ initial, doctorId }: DoctorFormProps) {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [saved, setSaved] = useState(false);
 
   function handleField<K extends keyof FormData>(key: K, value: FormData[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -79,8 +80,11 @@ export default function DoctorForm({ initial, doctorId }: DoctorFormProps) {
         const d = await res.json();
         throw new Error(d.error ?? "فشل الحفظ");
       }
-      router.push("/admin/doctors");
-      router.refresh();
+      setSaved(true);
+      setTimeout(() => {
+        router.push("/admin/doctors");
+        router.refresh();
+      }, 1200);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "حدث خطأ");
     } finally {
@@ -195,6 +199,12 @@ export default function DoctorForm({ initial, doctorId }: DoctorFormProps) {
 
       {error && (
         <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{error}</p>
+      )}
+      {saved && (
+        <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+          <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+          تم الحفظ بنجاح، جاري التحويل...
+        </div>
       )}
 
       <div className="flex gap-3">

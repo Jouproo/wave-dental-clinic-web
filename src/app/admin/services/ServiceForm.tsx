@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { Loader2, CheckCircle2 } from "lucide-react";
 import type { DbService } from "@/types/admin";
 
 const ICONS = [
@@ -40,6 +40,7 @@ export default function ServiceForm({ initial, isNew }: ServiceFormProps) {
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [saved, setSaved] = useState(false);
 
   function handleField<K extends keyof FormData>(key: K, value: FormData[K]) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -61,8 +62,11 @@ export default function ServiceForm({ initial, isNew }: ServiceFormProps) {
         const d = await res.json();
         throw new Error(d.error ?? "فشل الحفظ");
       }
-      router.push("/admin/services");
-      router.refresh();
+      setSaved(true);
+      setTimeout(() => {
+        router.push("/admin/services");
+        router.refresh();
+      }, 1200);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "حدث خطأ");
     } finally {
@@ -149,6 +153,12 @@ export default function ServiceForm({ initial, isNew }: ServiceFormProps) {
 
       {error && (
         <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-xl px-4 py-3">{error}</p>
+      )}
+      {saved && (
+        <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-xl px-4 py-3">
+          <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+          تم الحفظ بنجاح، جاري التحويل...
+        </div>
       )}
 
       <div className="flex gap-3">
