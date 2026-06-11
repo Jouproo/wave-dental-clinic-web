@@ -15,15 +15,16 @@ export default function FloatingWhatsAppButton({ whatsapp }: FloatingWhatsAppBut
   const url = makeWhatsAppUrl(whatsapp || clinicConfig.whatsappNumber);
 
   return (
-    <div className="fixed bottom-6 left-6 z-50 flex flex-col items-start gap-2">
+    <div className="fixed bottom-6 left-6 z-50">
+      {/* Tooltip — absolutely positioned, never shifts the button */}
       <AnimatePresence>
         {showTooltip && (
           <motion.div
-            initial={{ opacity: 0, x: -10, scale: 0.9 }}
-            animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: -10, scale: 0.9 }}
-            transition={{ duration: 0.2 }}
-            className="bg-white rounded-2xl shadow-xl px-4 py-3 max-w-[220px] border border-green-100"
+            initial={{ opacity: 0, y: 6, scale: 0.92 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 6, scale: 0.92 }}
+            transition={{ duration: 0.18 }}
+            className="absolute bottom-16 left-0 bg-white rounded-2xl shadow-xl px-4 py-3 w-52 border border-green-100 pointer-events-none"
           >
             <p className="text-slate-700 text-sm font-medium leading-snug">
               احجز موعدك الآن عبر واتساب! 👋
@@ -43,7 +44,7 @@ export default function FloatingWhatsAppButton({ whatsapp }: FloatingWhatsAppBut
         initial={{ scale: 0, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ delay: 1.5, type: "spring", stiffness: 300 }}
-        whileHover={{ scale: 1.12 }}
+        whileHover={{ scale: 1.1 }}
         whileTap={{ scale: 0.95 }}
         className="relative w-14 h-14 bg-gradient-to-br from-green-500 to-green-600 rounded-full shadow-lg shadow-green-500/40 flex items-center justify-center hover:shadow-green-500/60 transition-shadow"
       >
