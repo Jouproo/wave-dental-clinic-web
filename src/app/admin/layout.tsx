@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import AdminSidebar from "./components/AdminSidebar";
+import AdminShell from "./components/AdminShell";
 
 export const metadata: Metadata = {
   title: "لوحة التحكم - Wave Dental Clinic",
@@ -7,12 +7,5 @@ export const metadata: Metadata = {
 };
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="min-h-screen bg-gray-50 flex" dir="rtl">
-      <AdminSidebar />
-      <main className="flex-1 overflow-auto">
-        {children}
-      </main>
-    </div>
-  );
+  return <AdminShell>{children}</AdminShell>;
 }
