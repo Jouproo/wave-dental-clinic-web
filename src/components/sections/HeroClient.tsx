@@ -2,7 +2,9 @@
 
 import { motion } from "framer-motion";
 import { MessageCircle, MapPin, CheckCircle, Sparkles } from "lucide-react";
-import { getWhatsAppUrl, clinicConfig } from "@/config/clinic";
+import { clinicConfig } from "@/config/clinic";
+import { makeWhatsAppUrl, defaultSettings } from "@/lib/clinic-settings";
+import type { DbClinicSettings } from "@/types/admin";
 import Image from "next/image";
 
 const trustPoints = [
@@ -20,9 +22,12 @@ const floatingCards = [
 
 interface HeroClientProps {
   heroImageUrl: string | null;
+  settings?: DbClinicSettings;
 }
 
-export default function HeroClient({ heroImageUrl }: HeroClientProps) {
+export default function HeroClient({ heroImageUrl, settings = defaultSettings }: HeroClientProps) {
+  const whatsappUrl = makeWhatsAppUrl(settings.whatsapp || clinicConfig.whatsappNumber);
+  const mapsUrl = settings.google_maps_direction_url || clinicConfig.googleMapsDirectionUrl;
   return (
     <section
       id="hero"
@@ -88,7 +93,7 @@ export default function HeroClient({ heroImageUrl }: HeroClientProps) {
               className="flex flex-col sm:flex-row gap-3 mb-10"
             >
               <motion.a
-                href={getWhatsAppUrl()}
+                href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.04 }}
@@ -100,7 +105,7 @@ export default function HeroClient({ heroImageUrl }: HeroClientProps) {
               </motion.a>
 
               <motion.a
-                href={clinicConfig.googleMapsDirectionUrl}
+                href={mapsUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.04 }}

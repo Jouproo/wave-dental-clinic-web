@@ -1,5 +1,6 @@
 import HeroClient from "./HeroClient";
 import { supabaseServer } from "@/lib/supabase";
+import type { DbClinicSettings } from "@/types/admin";
 
 async function getHeroImageUrl(): Promise<string | null> {
   try {
@@ -16,7 +17,11 @@ async function getHeroImageUrl(): Promise<string | null> {
   }
 }
 
-export default async function HeroSection() {
+interface HeroSectionProps {
+  settings?: DbClinicSettings;
+}
+
+export default async function HeroSection({ settings }: HeroSectionProps) {
   const heroImageUrl = await getHeroImageUrl();
-  return <HeroClient heroImageUrl={heroImageUrl} />;
+  return <HeroClient heroImageUrl={heroImageUrl} settings={settings} />;
 }

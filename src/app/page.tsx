@@ -23,7 +23,7 @@ export default async function Home() {
     <>
       <Header settings={settings} />
       <main>
-        <HeroSection />
+        <HeroSection settings={settings} />
         <ServicesSection />
         <WhyChooseUsSection />
         <PatientJourneySection />
