@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git rm *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git reset *)",
+      "Bash(timeout 12 bash -c \"until grep -q 'Local' C:/Users/User/AppData/Local/Temp/claude/c--projects-dental-clinic/8f1fa2dc-e83b-4a77-8e94-520578119f08/tasks/bf5ip10rj.output 2>/dev/null; do sleep 1; done; cat C:/Users/User/AppData/Local/Temp/claude/c--projects-dental-clinic/8f1fa2dc-e83b-4a77-8e94-520578119f08/tasks/bf5ip10rj.output\")"
+    ]
+  }
+}
