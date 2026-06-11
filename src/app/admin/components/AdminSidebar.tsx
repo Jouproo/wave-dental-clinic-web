@@ -26,9 +26,19 @@ export default function AdminSidebar() {
   return (
     <aside className="w-56 bg-white border-l border-gray-200 flex flex-col shadow-sm min-h-screen">
       {/* Brand */}
-      <div className="px-5 py-6 border-b border-gray-100">
-        <p className="text-xs text-gray-400 mt-0.5">لوحة التحكم</p>
-        <h2 className="font-bold text-blue-700 text-base leading-tight">Wave Dental</h2>
+      <div className="px-5 py-5 border-b border-gray-100 flex items-center justify-between">
+        <div>
+          <p className="text-xs text-gray-400">لوحة التحكم</p>
+          <h2 className="font-bold text-blue-700 text-base leading-tight">Wave Dental</h2>
+        </div>
+        {/* Close button — mobile only */}
+        <button
+          onClick={() => window.dispatchEvent(new CustomEvent("admin-sidebar-close"))}
+          className="lg:hidden p-1.5 rounded-lg text-gray-400 hover:bg-gray-100 transition-colors"
+          aria-label="إغلاق القائمة"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
       </div>
 
       {/* Nav */}
