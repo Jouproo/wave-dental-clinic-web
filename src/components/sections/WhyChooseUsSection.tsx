@@ -3,7 +3,9 @@
 import { motion } from "framer-motion";
 import { Award, ClipboardList, ShieldCheck, Cpu, MessageCircle, Heart } from "lucide-react";
 import SectionHeader from "@/components/shared/SectionHeader";
-import { getWhatsAppUrl } from "@/config/clinic";
+import { clinicConfig } from "@/config/clinic";
+import { makeWhatsAppUrl, defaultSettings } from "@/lib/clinic-settings";
+import type { DbClinicSettings } from "@/types/admin";
 
 const benefits = [
   {
@@ -50,7 +52,13 @@ const benefits = [
   },
 ];
 
-export default function WhyChooseUsSection() {
+interface WhyChooseUsSectionProps {
+  settings?: DbClinicSettings;
+}
+
+export default function WhyChooseUsSection({ settings = defaultSettings }: WhyChooseUsSectionProps) {
+  const whatsappUrl = makeWhatsAppUrl(settings.whatsapp || clinicConfig.whatsappNumber);
+
   return (
     <section id="why-us" className="py-24 bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -90,7 +98,7 @@ export default function WhyChooseUsSection() {
             </div>
 
             <motion.a
-              href={getWhatsAppUrl()}
+              href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
               whileHover={{ scale: 1.04 }}

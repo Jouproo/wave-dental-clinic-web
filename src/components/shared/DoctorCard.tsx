@@ -2,19 +2,20 @@
 
 import { motion } from "framer-motion";
 import { UserCircle, Award, MessageCircle } from "lucide-react";
-import { getWhatsAppUrl } from "@/config/clinic";
+import { clinicConfig } from "@/config/clinic";
+import { makeWhatsAppUrl } from "@/lib/clinic-settings";
 import type { Doctor } from "@/data/doctors";
 import Image from "next/image";
 
 interface DoctorCardProps {
   doctor: Doctor;
   index: number;
+  clinicWhatsapp?: string;
 }
 
-export default function DoctorCard({ doctor, index }: DoctorCardProps) {
-  const whatsappUrl = doctor.whatsapp
-    ? `https://wa.me/${doctor.whatsapp.replace(/\D/g, "")}?text=${encodeURIComponent(`أريد حجز موعد مع ${doctor.name}`)}`
-    : getWhatsAppUrl(`أريد حجز موعد مع ${doctor.name}`);
+export default function DoctorCard({ doctor, index, clinicWhatsapp }: DoctorCardProps) {
+  const whatsappNumber = doctor.whatsapp || clinicWhatsapp || clinicConfig.whatsappNumber;
+  const whatsappUrl = makeWhatsAppUrl(whatsappNumber, `أريد حجز موعد مع ${doctor.name}`);
 
   return (
     <motion.div

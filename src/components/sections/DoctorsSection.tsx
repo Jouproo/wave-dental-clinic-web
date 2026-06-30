@@ -3,7 +3,7 @@ import DoctorCard from "@/components/shared/DoctorCard";
 import { doctors as staticDoctors } from "@/data/doctors";
 import { supabaseServer } from "@/lib/supabase";
 import type { Doctor } from "@/data/doctors";
-import type { DbDoctor } from "@/types/admin";
+import type { DbDoctor, DbClinicSettings } from "@/types/admin";
 
 function dbToDoctor(d: DbDoctor): Doctor {
   return {
@@ -37,7 +37,11 @@ async function getDoctors(): Promise<Doctor[]> {
   }
 }
 
-export default async function DoctorsSection() {
+interface DoctorsSectionProps {
+  settings?: DbClinicSettings;
+}
+
+export default async function DoctorsSection({ settings }: DoctorsSectionProps) {
   const doctors = await getDoctors();
 
   return (
@@ -51,7 +55,7 @@ export default async function DoctorsSection() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {doctors.map((doctor, i) => (
-            <DoctorCard key={doctor.id} doctor={doctor} index={i} />
+            <DoctorCard key={doctor.id} doctor={doctor} index={i} clinicWhatsapp={settings?.whatsapp} />
           ))}
         </div>
       </div>

@@ -25,9 +25,9 @@ export default async function Home() {
       <main>
         <HeroSection settings={settings} />
         <ServicesSection />
-        <WhyChooseUsSection />
+        <WhyChooseUsSection settings={settings} />
         <PatientJourneySection />
-        <DoctorsSection />
+        <DoctorsSection settings={settings} />
         <ResultsSection />
         <TestimonialsSection />
         <LocationSection settings={settings} />
