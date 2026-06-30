@@ -6,7 +6,7 @@ import { services as staticServices } from "@/data/services";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import FloatingWhatsAppButton from "@/components/shared/FloatingWhatsAppButton";
-import { getWhatsAppUrl } from "@/config/clinic";
+import { getClinicSettings, makeWhatsAppUrl } from "@/lib/clinic-settings";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -53,7 +53,7 @@ async function getServiceData(id: string) {
 
 export default async function ServiceDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const data = await getServiceData(id);
+  const [data, settings] = await Promise.all([getServiceData(id), getClinicSettings()]);
   if (!data) notFound();
 
   const { service, gallery } = data;
@@ -61,7 +61,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
 
   return (
     <div className="min-h-screen bg-white" dir="rtl">
-      <Header />
+      <Header settings={settings} />
 
       <main className="pt-24">
         {/* Hero banner */}
@@ -113,7 +113,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
             <p className="text-slate-500 mb-8">تواصل معنا الآن لحجز موعد أو الاستفسار عن التفاصيل</p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
               <a
-                href={getWhatsAppUrl(`أريد الاستفسار عن خدمة ${service.title}`)}
+                href={makeWhatsAppUrl(settings.whatsapp, `أريد الاستفسار عن خدمة ${service.title}`)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold px-6 py-3.5 rounded-xl transition-colors"
@@ -133,8 +133,8 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
         </section>
       </main>
 
-      <Footer />
-      <FloatingWhatsAppButton />
+      <Footer settings={settings} />
+      <FloatingWhatsAppButton whatsapp={settings.whatsapp} />
     </div>
   );
 }
