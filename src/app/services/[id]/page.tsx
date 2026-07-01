@@ -97,7 +97,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
                 </span>
                 <h2 className="text-2xl font-bold text-slate-800">صور قبل وبعد</h2>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {gallery.map((item) => (
                   <GalleryCard key={item.id} item={item} />
                 ))}
@@ -142,23 +142,25 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
 function GalleryCard({ item }: { item: DbGallery }) {
   return (
     <div className="bg-white rounded-2xl overflow-hidden shadow-md border border-slate-100">
-      <div className="grid grid-cols-2">
-        <div className="relative aspect-square bg-gray-100">
-          {item.before_image_url ? (
-            <Image src={item.before_image_url} alt="قبل" fill className="object-cover" unoptimized />
-          ) : (
-            <div className="h-full flex items-center justify-center text-slate-400 text-xs">—</div>
-          )}
-          <span className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2 py-0.5 rounded-full">قبل</span>
-        </div>
-        <div className="relative aspect-square bg-gray-100">
-          {item.after_image_url ? (
-            <Image src={item.after_image_url} alt="بعد" fill className="object-cover" unoptimized />
-          ) : (
-            <div className="h-full flex items-center justify-center text-slate-400 text-xs">—</div>
-          )}
-          <span className="absolute top-2 right-2 bg-blue-600/80 text-white text-xs px-2 py-0.5 rounded-full">بعد</span>
-        </div>
+      {/* قبل — فوق */}
+      <div className="relative aspect-video bg-gray-100">
+        {item.before_image_url ? (
+          <Image src={item.before_image_url} alt="قبل" fill className="object-cover" unoptimized />
+        ) : (
+          <div className="h-full flex items-center justify-center text-slate-400 text-xs">—</div>
+        )}
+        <span className="absolute top-2 right-2 bg-black/60 text-white text-xs px-2.5 py-1 rounded-full font-medium">قبل</span>
+      </div>
+      {/* فاصل */}
+      <div className="h-px bg-slate-100" />
+      {/* بعد — تحت */}
+      <div className="relative aspect-video bg-gray-100">
+        {item.after_image_url ? (
+          <Image src={item.after_image_url} alt="بعد" fill className="object-cover" unoptimized />
+        ) : (
+          <div className="h-full flex items-center justify-center text-slate-400 text-xs">—</div>
+        )}
+        <span className="absolute top-2 right-2 bg-blue-600 text-white text-xs px-2.5 py-1 rounded-full font-medium">بعد</span>
       </div>
       {item.caption && (
         <div className="px-4 py-3">
