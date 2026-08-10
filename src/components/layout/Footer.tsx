@@ -1,5 +1,6 @@
 import { Phone, MapPin, Mail, Clock, Facebook, Instagram } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { clinicConfig } from "@/config/clinic";
 import { makeWhatsAppUrl, defaultSettings } from "@/lib/clinic-settings";
 import type { DbClinicSettings } from "@/types/admin";
@@ -45,7 +46,7 @@ export default function Footer({ settings = defaultSettings }: FooterProps) {
 
           {/* Brand */}
           <div className="lg:col-span-1">
-            <a href="/" className="inline-block mb-4">
+            <Link href="/" className="inline-block mb-4">
               <Image
                 src="/images/web_logo.png"
                 alt="Wave Dental Clinic"
@@ -53,7 +54,7 @@ export default function Footer({ settings = defaultSettings }: FooterProps) {
                 height={52}
                 className="h-12 w-auto object-contain brightness-0 invert"
               />
-            </a>
+            </Link>
             <p className="text-sm leading-relaxed text-slate-400 mb-5">
               نقدم خدمات طب أسنان متكاملة بأعلى معايير الجودة والتعقيم في بيئة مريحة ومتقدمة.
             </p>
@@ -83,9 +84,9 @@ export default function Footer({ settings = defaultSettings }: FooterProps) {
             <ul className="space-y-2">
               {quickLinks.map((link) => (
                 <li key={link.href}>
-                  <a href={link.href} className="text-sm text-slate-400 hover:text-blue-400 transition-colors">
+                  <Link href={link.href} className="text-sm text-slate-400 hover:text-blue-400 transition-colors">
                     {link.label}
-                  </a>
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -97,7 +98,7 @@ export default function Footer({ settings = defaultSettings }: FooterProps) {
             <ul className="space-y-2">
               {serviceLinks.map((s) => (
                 <li key={s}>
-                  <a href="/#services" className="text-sm text-slate-400 hover:text-blue-400 transition-colors">{s}</a>
+                  <Link href="/#services" className="text-sm text-slate-400 hover:text-blue-400 transition-colors">{s}</Link>
                 </li>
               ))}
             </ul>

@@ -1,4 +1,4 @@
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -14,15 +14,36 @@ import LocationSection from "@/components/sections/LocationSection";
 import BookingSection from "@/components/sections/BookingSection";
 import FAQSection from "@/components/sections/FAQSection";
 import FinalCTASection from "@/components/sections/FinalCTASection";
+import MobileStickyBar from "@/components/shared/MobileStickyBar";
 import { getClinicSettings } from "@/lib/clinic-settings";
+import { faqs } from "@/data/faqs";
+
+function FaqJsonLd() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqs.map((faq) => ({
+      "@type": "Question",
+      name: faq.question,
+      acceptedAnswer: { "@type": "Answer", text: faq.answer },
+    })),
+  };
+  return (
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+    />
+  );
+}
 
 export default async function Home() {
   const settings = await getClinicSettings();
 
   return (
     <>
+      <FaqJsonLd />
       <Header settings={settings} />
-      <main>
+      <main className="pb-[68px] md:pb-0">
         <HeroSection settings={settings} />
         <ServicesSection />
         <WhyChooseUsSection settings={settings} />
@@ -37,6 +58,7 @@ export default async function Home() {
       </main>
       <Footer settings={settings} />
       <FloatingWhatsAppButton whatsapp={settings.whatsapp} />
+      <MobileStickyBar settings={settings} />
     </>
   );
 }

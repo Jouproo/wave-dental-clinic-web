@@ -22,7 +22,7 @@ export default function FloatingWhatsAppButton({ whatsapp }: FloatingWhatsAppBut
   const url = makeWhatsAppUrl(whatsapp || clinicConfig.whatsappNumber);
 
   return (
-    <div className="fixed bottom-6 left-6 z-50">
+    <div className="hidden md:block fixed bottom-6 left-6 z-50">
       <AnimatePresence>
         {showTooltip && (
           <motion.div

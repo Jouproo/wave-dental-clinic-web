@@ -11,69 +11,89 @@ export interface Service {
   display_order?: number;
 }
 
+// Offline fallback only — used if Supabase is unreachable. Mirrors the
+// clinic's real, admin-managed service list (copy, order, icons) so it
+// stays consistent with what's actually live in the database.
 export const services: Service[] = [
   {
-    id: "orthodontics",
-    icon: "Smile",
-    title: "تقويم الأسنان",
-    description:
-      "حلول تقويم متكاملة للأطفال والبالغين باستخدام أحدث التقنيات لتحقيق الإطار المثالي لأسنانك.",
-    shortCta: "اعرف أكثر",
-  },
-  {
-    id: "implants",
-    icon: "Zap",
+    id: "implantology",
+    icon: "Anchor",
     title: "زراعة الأسنان",
     description:
-      "زراعة أسنان دائمة بمواد عالية الجودة وتقنيات دقيقة لاستعادة ابتسامتك وثقتك بنفسك.",
+      "نعوّض الأسنان المفقودة بغرسات ثابتة بعد تقييم العظام واللثة، لاستعادة كفاءة المضغ ومظهر طبيعي يتناسب مع ابتسامتك.",
     shortCta: "اعرف أكثر",
+    display_order: 1,
   },
   {
-    id: "cosmetic",
-    icon: "Star",
-    title: "تجميل الأسنان",
+    id: "orthodontics",
+    icon: "Layers",
+    title: "تقويم الأسنان",
     description:
-      "هوليوود سمايل وفينير وقشور خزفية لإطلالة ساحرة تناسب شكل وجهك بالكامل.",
+      "نصحح تزاحم الأسنان ومشكلات الإطباق بخطة تقويم تناسب الحالة، مع متابعة منتظمة للوصول إلى ابتسامة متوازنة ووظيفة أفضل للأسنان.",
     shortCta: "اعرف أكثر",
+    display_order: 2,
   },
   {
-    id: "whitening",
-    icon: "Sparkles",
-    title: "تبييض الأسنان",
-    description:
-      "جلسات تبييض آمنة وفعّالة تمنحك بياضًا ناصعًا بدون ألم وبنتائج مضمونة.",
-    shortCta: "اعرف أكثر",
-  },
-  {
-    id: "rootcanal",
-    icon: "Shield",
+    id: "endodontics",
+    icon: "Activity",
     title: "علاج الجذور",
     description:
-      "علاج قنوات الجذور بأحدث الأجهزة وبأقل ألم ممكن للحفاظ على أسنانك الطبيعية.",
+      "نعالج التهاب عصب الأسنان بدقة لتخفيف الألم والحفاظ على السن الطبيعي قدر الإمكان، مع متابعة الحالة بعد انتهاء العلاج.",
     shortCta: "اعرف أكثر",
+    display_order: 3,
   },
   {
-    id: "filling",
-    icon: "Layers",
-    title: "حشو الأسنان",
+    id: "esthetics",
+    icon: "Sparkles",
+    title: "تجميل الأسنان",
     description:
-      "حشوات تجميلية بألوان تتوافق مع أسنانك الطبيعية باستخدام مواد حديثة وآمنة.",
+      "نحسّن شكل الابتسامة بالفينير وإعادة تشكيل الأسنان والحلول التجميلية المناسبة، مع التركيز على نتيجة طبيعية ومتناسقة مع ملامح الوجه.",
     shortCta: "اعرف أكثر",
+    display_order: 4,
   },
   {
-    id: "cleaning",
-    icon: "Droplets",
-    title: "تنظيف الجير",
+    id: "fixed-prothodontics",
+    icon: "Crown",
+    title: "التركيبات الثابتة",
     description:
-      "جلسات تنظيف عميقة للأسنان واللثة بأجهزة التراساونيك للحصول على أسنان نظيفة وصحية.",
+      "نقدم تيجانًا وجسورًا مصممة لتعويض الأسنان التالفة أو المفقودة، واستعادة وظيفة المضغ بمظهر قريب من الأسنان الطبيعية.",
     shortCta: "اعرف أكثر",
+    display_order: 5,
   },
   {
-    id: "pediatric",
-    icon: "Heart",
-    title: "طب أسنان الأطفال",
+    id: "biomimetic-restorations",
+    icon: "Shield",
+    title: "الترميم الحيوي للأسنان",
     description:
-      "بيئة مريحة وودية للأطفال مع أطباء متخصصين في علاج أسنان الأطفال بلطف واحترافية.",
+      "نعيد بناء الأسنان المتضررة بمواد وتقنيات تحاكي بنيتها الطبيعية، بهدف الحفاظ على أكبر قدر ممكن من أنسجة السن السليمة.",
     shortCta: "اعرف أكثر",
+    display_order: 6,
+  },
+  {
+    id: "bleaching",
+    icon: "Star",
+    title: "تبييض الأسنان",
+    description:
+      "نزيل التصبغات السطحية بتبييض احترافي يراعي صحة مينا الأسنان ودرجة الحساسية، بعد تقييم الطبيب واختيار الطريقة المناسبة.",
+    shortCta: "اعرف أكثر",
+    display_order: 7,
+  },
+  {
+    id: "removable-prosthodontics",
+    icon: "Smile",
+    title: "التركيبات المتحركة",
+    description:
+      "نقدم حلولًا مريحة لتعويض عدة أسنان أو الفقد الكامل، بتصميم يناسب الفم ويساعد على تحسين المضغ والكلام والثقة بالابتسامة.",
+    shortCta: "اعرف أكثر",
+    display_order: 8,
+  },
+  {
+    id: "surgery",
+    icon: "Cross",
+    title: "جراحة الفم والفكين",
+    description:
+      "نعالج ضروس العقل والأسنان المدفونة وبعض الحالات الجراحية بالفم والفكين، بعد فحص وتشخيص يحددان الإجراء الأنسب لكل حالة.",
+    shortCta: "اعرف أكثر",
+    display_order: 9,
   },
 ];

@@ -9,21 +9,23 @@ export const clinicConfig = {
   tagline: "ابتسامتك تبدأ من عيادة تهتم بكل تفصيلة",
 
   // Contact
-  phoneNumber: "+201019575925",
-  whatsappNumber: "+201019575925",
+  phoneNumber: "+201091957525",
+  whatsappNumber: "+201091957525",
   whatsappMessage: "مرحبًا، أريد حجز موعد في ويف دنتال كلينيك",
   email: "info@wavedentalclinic.com",
 
   // Address
-  address: "6 أكتوبر، الجيزة، مصر",
+  address: "٦ أكتوبر - الحصري - أبراج الأمريكية 5 - مدخل البرج أمام بلبن - الدور الرابع، الجيزة",
 
   // Working hours
-  workingHours: "مفتوح دائمًا",
+  workingHours: "يوميًا من 10 صباحًا حتى 11:30 مساءً",
 
   // Google Maps
   googleMapsEmbedUrl:
-    "https://maps.google.com/maps?q=6+October+City,Giza,Egypt&output=embed",
-  googleMapsDirectionUrl: "https://maps.app.goo.gl/WWvmsKun7v28EWUx9",
+    "https://maps.google.com/maps?q=" +
+    encodeURIComponent("XWFV+9VQ, El-Tahrir, First 6th of October, Giza Governorate 15525") +
+    "&output=embed",
+  googleMapsDirectionUrl: "https://maps.app.goo.gl/TjgZSw2gbx5M14JX7?g_st=com.google.maps.preview.copy",
 
   // Booking — change this later to your booking system URL
   bookingUrl: "",

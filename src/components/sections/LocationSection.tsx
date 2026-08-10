@@ -14,8 +14,16 @@ interface LocationSectionProps {
 export default function LocationSection({ settings = defaultSettings }: LocationSectionProps) {
   const address = settings.address || clinicConfig.address;
   const workingHours = settings.working_hours || clinicConfig.workingHours;
-  const mapsEmbedUrl = settings.google_maps_embed_url || clinicConfig.googleMapsEmbedUrl;
-  const mapsDirectionUrl = settings.google_maps_direction_url || clinicConfig.googleMapsDirectionUrl;
+
+  // Google share-links (e.g. https://share.google/xxxx) aren't valid <iframe>
+  // embed sources — only real "output=embed" URLs render inside an iframe.
+  const rawEmbedUrl = settings.google_maps_embed_url || clinicConfig.googleMapsEmbedUrl;
+  const isEmbeddable = /[?&]output=embed/.test(rawEmbedUrl || "");
+  const mapsEmbedUrl = isEmbeddable ? rawEmbedUrl : "";
+  const mapsDirectionUrl =
+    settings.google_maps_direction_url ||
+    (!isEmbeddable ? rawEmbedUrl : "") ||
+    clinicConfig.googleMapsDirectionUrl;
   const phone = settings.phone || clinicConfig.phoneNumber;
   const whatsappUrl = makeWhatsAppUrl(settings.whatsapp || clinicConfig.whatsappNumber);
 

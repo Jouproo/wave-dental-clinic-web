@@ -147,10 +147,10 @@ export default function HeroClient({ heroImageUrl, settings = defaultSettings }:
                     <div className="w-full h-full rounded-2xl overflow-hidden relative shadow-2xl">
                       <Image
                         src={heroImageUrl}
-                        alt="Hero visual"
+                        alt={`${clinicConfig.clinicName} — عيادة أسنان في 6 أكتوبر`}
                         fill
+                        sizes="(max-width: 1024px) 90vw, 400px"
                         className="object-cover"
-                        unoptimized
                         priority
                       />
                       <div className="absolute inset-0 bg-blue-900/20 rounded-2xl" />

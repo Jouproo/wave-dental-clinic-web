@@ -32,10 +32,10 @@ export default function DoctorCard({ doctor, index, clinicWhatsapp }: DoctorCard
         {doctor.image_url ? (
           <Image
             src={doctor.image_url}
-            alt={doctor.name}
+            alt={`${doctor.name} — ${doctor.specialty}`}
             fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover"
-            unoptimized
           />
         ) : (
           <UserCircle className="w-28 h-28 text-blue-300" strokeWidth={1.2} />

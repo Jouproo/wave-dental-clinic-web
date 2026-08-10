@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Menu, X, Phone } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { clinicConfig } from "@/config/clinic";
 import { makeWhatsAppUrl, defaultSettings } from "@/lib/clinic-settings";
@@ -27,15 +28,16 @@ export default function Header({ settings = defaultSettings }: HeaderProps) {
   const pathname = usePathname();
   const isHome = pathname === "/";
 
-  const [scrolled, setScrolled] = useState(!isHome); // internal pages always "scrolled"
+  const [scrollY, setScrollY] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
+  const scrolled = !isHome || scrollY > 20; // internal pages always "scrolled"
 
   const phone = settings.phone || clinicConfig.phoneNumber;
   const whatsappUrl = makeWhatsAppUrl(settings.whatsapp || clinicConfig.whatsappNumber);
 
   useEffect(() => {
-    if (!isHome) { setScrolled(true); return; }
-    const onScroll = () => setScrolled(window.scrollY > 20);
+    if (!isHome) return;
+    const onScroll = () => setScrollY(window.scrollY);
     window.addEventListener("scroll", onScroll, { passive: true });
     onScroll();
     return () => window.removeEventListener("scroll", onScroll);
@@ -67,7 +69,7 @@ export default function Header({ settings = defaultSettings }: HeaderProps) {
           <div className="flex items-center justify-between h-16 md:h-20">
 
             {/* Logo — goes to / from any page */}
-            <a
+            <Link
               href="/"
               onClick={(e) => { if (isHome) { e.preventDefault(); handleNavClick("#hero"); } }}
               className="flex items-center gap-2 flex-shrink-0"
@@ -80,7 +82,7 @@ export default function Header({ settings = defaultSettings }: HeaderProps) {
                 className={`h-12 w-auto object-contain transition-all ${scrolled ? "" : "brightness-0 invert"}`}
                 priority
               />
-            </a>
+            </Link>
 
             {/* Desktop Nav */}
             <nav className="hidden lg:flex items-center gap-1">
