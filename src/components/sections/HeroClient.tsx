@@ -48,7 +48,7 @@ export default function HeroClient({ heroImageUrl, settings = defaultSettings }:
         />
       </div>
 
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-28 pb-20">
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-14 lg:pt-28 lg:pb-20">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
 
           {/* Left: Content */}
@@ -121,7 +121,7 @@ export default function HeroClient({ heroImageUrl, settings = defaultSettings }:
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.6 }}
-              className="flex flex-wrap gap-4"
+              className="grid grid-cols-2 sm:flex sm:flex-wrap gap-3 sm:gap-4"
             >
               {trustPoints.map((pt) => (
                 <div key={pt.label} className="flex items-center gap-1.5 text-white/70 text-sm">

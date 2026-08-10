@@ -15,6 +15,8 @@
 /* Arabic / RTL base */
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 body {
@@ -23,6 +25,12 @@ body {
   font-family: var(--font-cairo), "Cairo", sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Below-the-fold whileInView animations sit at their off-canvas initial
+     transform (e.g. translateX) until scrolled into view, which can
+     momentarily widen the document on narrow viewports. This is a safety
+     net so that never produces a horizontal scrollbar. */
+  overflow-x: hidden;
+  max-width: 100%;
 }
 
 /* RTL scrollbar */

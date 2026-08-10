@@ -55,7 +55,7 @@ function FAQItem({ question, answer, index }: { question: string; answer: string
 
 export default function FAQSection() {
   return (
-    <section id="faq" className="py-24 bg-gradient-to-br from-slate-50 to-white">
+    <section id="faq" className="py-14 md:py-20 lg:py-24 bg-gradient-to-br from-slate-50 to-white">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeader
           badge="الأسئلة الشائعة"

@@ -16,7 +16,7 @@ export default function BookingSection({ settings = defaultSettings }: BookingSe
   const primaryBookingUrl = clinicConfig.bookingUrl || whatsappUrl;
 
   return (
-    <section id="booking" className="py-24 bg-gradient-to-br from-blue-600 to-sky-600 relative overflow-hidden">
+    <section id="booking" className="py-14 md:py-20 lg:py-24 bg-gradient-to-br from-blue-600 to-sky-600 relative overflow-hidden">
       <div className="absolute inset-0 pointer-events-none">
         <div className="absolute -top-20 -right-20 w-72 h-72 bg-white/5 rounded-full blur-3xl" />
         <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-white/5 rounded-full blur-3xl" />

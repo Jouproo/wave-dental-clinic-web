@@ -50,7 +50,7 @@ const steps = [
 
 export default function PatientJourneySection() {
   return (
-    <section id="journey" className="py-24 bg-white">
+    <section id="journey" className="py-14 md:py-20 lg:py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeader
           badge="تجربتك معنا"

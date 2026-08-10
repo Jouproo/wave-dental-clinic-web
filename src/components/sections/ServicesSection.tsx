@@ -40,9 +40,9 @@ export default async function ServicesSection() {
   const services = await getServices();
 
   return (
-    <section id="services" aria-labelledby="services-heading" className="py-24 bg-white">
+    <section id="services" aria-labelledby="services-heading" className="py-14 md:py-20 lg:py-24 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-10 md:mb-12">
+        <div className="mb-8 md:mb-12">
           <span className="inline-block text-sm font-semibold px-4 py-1.5 rounded-full bg-blue-100 text-blue-700 mb-4">
             خدماتنا
           </span>

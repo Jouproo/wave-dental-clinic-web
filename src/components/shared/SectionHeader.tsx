@@ -27,7 +27,7 @@ export default function SectionHeader({
       viewport={{ once: true }}
       transition={{ duration: 0.6 }}
       className={cn(
-        "mb-12",
+        "mb-8 md:mb-12",
         centered && "text-center",
         className
       )}

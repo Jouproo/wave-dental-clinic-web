@@ -60,7 +60,7 @@ export default function WhyChooseUsSection({ settings = defaultSettings }: WhyCh
   const whatsappUrl = makeWhatsAppUrl(settings.whatsapp || clinicConfig.whatsappNumber);
 
   return (
-    <section id="why-us" className="py-24 bg-gradient-to-br from-slate-50 to-blue-50">
+    <section id="why-us" className="py-14 md:py-20 lg:py-24 bg-gradient-to-br from-slate-50 to-blue-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-16 items-center">
           {/* Left: Text */}
