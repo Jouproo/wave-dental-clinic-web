@@ -31,6 +31,7 @@ export default function Footer({ settings = defaultSettings }: FooterProps) {
     { label: "خدماتنا",        href: "/#services" },
     { label: "لماذا نحن؟",     href: "/#why-us" },
     { label: "أطباؤنا",        href: "/#doctors" },
+    { label: "دليل الأسنان",   href: "/blog" },
     { label: "الأسئلة الشائعة", href: "/#faq" },
   ];
 

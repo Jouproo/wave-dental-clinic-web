@@ -13,6 +13,7 @@ import TestimonialsSection from "@/components/sections/TestimonialsSection";
 import LocationSection from "@/components/sections/LocationSection";
 import BookingSection from "@/components/sections/BookingSection";
 import FAQSection from "@/components/sections/FAQSection";
+import BlogTeaserSection from "@/components/sections/BlogTeaserSection";
 import FinalCTASection from "@/components/sections/FinalCTASection";
 import MobileStickyBar from "@/components/shared/MobileStickyBar";
 import { getClinicSettings } from "@/lib/clinic-settings";
@@ -54,6 +55,7 @@ export default async function Home() {
         <LocationSection settings={settings} />
         <BookingSection settings={settings} />
         <FAQSection />
+        <BlogTeaserSection />
         <FinalCTASection settings={settings} />
       </main>
       <Footer settings={settings} />

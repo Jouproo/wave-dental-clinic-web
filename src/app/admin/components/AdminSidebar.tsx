@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Home, Image, UserRound, Stethoscope, LogOut, Settings, Users, ExternalLink } from "lucide-react";
+import { Home, Image, UserRound, Stethoscope, LogOut, Settings, Users, ExternalLink, Newspaper } from "lucide-react";
 import { clsx } from "clsx";
 
 const navItems = [
@@ -10,6 +10,7 @@ const navItems = [
   { href: "/admin/hero", label: "الهيرو", icon: Image, exact: false },
   { href: "/admin/doctors", label: "الأطباء", icon: UserRound, exact: false },
   { href: "/admin/services", label: "الخدمات", icon: Stethoscope, exact: false },
+  { href: "/admin/blog", label: "المقالات", icon: Newspaper, exact: false },
   { href: "/admin/clinic", label: "العيادة", icon: Settings, exact: false },
   { href: "/admin/members", label: "المسؤولون", icon: Users, exact: false },
 ];

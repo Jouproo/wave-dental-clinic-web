@@ -10,12 +10,13 @@ import { clinicConfig } from "@/config/clinic";
 import { makeWhatsAppUrl, defaultSettings } from "@/lib/clinic-settings";
 import type { DbClinicSettings } from "@/types/admin";
 
-const navLinks = [
+const navLinks: { label: string; hash?: string; href?: string }[] = [
   { label: "الرئيسية",   hash: "#hero" },
   { label: "خدماتنا",    hash: "#services" },
   { label: "لماذا نحن؟", hash: "#why-us" },
   { label: "أطباؤنا",    hash: "#doctors" },
   { label: "نتائج المرضى", hash: "#results" },
+  { label: "دليل الأسنان", href: "/blog" },
   { label: "موقعنا",     hash: "#location" },
   { label: "تواصل معنا", hash: "#contact" },
 ];
@@ -86,18 +87,30 @@ export default function Header({ settings = defaultSettings }: HeaderProps) {
 
             {/* Desktop Nav */}
             <nav className="hidden lg:flex items-center gap-1">
-              {navLinks.map((link) => (
-                <a
-                  key={link.hash}
-                  href={isHome ? link.hash : `/${link.hash}`}
-                  onClick={(e) => { e.preventDefault(); handleNavClick(link.hash); }}
-                  className={`text-sm font-medium px-3 py-2 rounded-lg transition-all hover:bg-blue-50 hover:text-blue-700 ${
-                    scrolled ? "text-slate-600" : "text-white/90 hover:text-blue-700"
-                  }`}
-                >
-                  {link.label}
-                </a>
-              ))}
+              {navLinks.map((link) =>
+                link.href ? (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className={`text-sm font-medium px-3 py-2 rounded-lg transition-all hover:bg-blue-50 hover:text-blue-700 ${
+                      scrolled ? "text-slate-600" : "text-white/90 hover:text-blue-700"
+                    }`}
+                  >
+                    {link.label}
+                  </Link>
+                ) : (
+                  <a
+                    key={link.hash}
+                    href={isHome ? link.hash : `/${link.hash}`}
+                    onClick={(e) => { e.preventDefault(); handleNavClick(link.hash!); }}
+                    className={`text-sm font-medium px-3 py-2 rounded-lg transition-all hover:bg-blue-50 hover:text-blue-700 ${
+                      scrolled ? "text-slate-600" : "text-white/90 hover:text-blue-700"
+                    }`}
+                  >
+                    {link.label}
+                  </a>
+                )
+              )}
             </nav>
 
             {/* CTA */}
@@ -147,19 +160,36 @@ export default function Header({ settings = defaultSettings }: HeaderProps) {
             className="fixed top-16 right-0 left-0 z-30 bg-white/98 backdrop-blur-lg shadow-xl border-t border-slate-100 overflow-hidden lg:hidden"
           >
             <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-1">
-              {navLinks.map((link, i) => (
-                <motion.a
-                  key={link.hash}
-                  href={isHome ? link.hash : `/${link.hash}`}
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.04 }}
-                  onClick={(e) => { e.preventDefault(); handleNavClick(link.hash); }}
-                  className="text-slate-700 font-medium py-3 px-4 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition-colors"
-                >
-                  {link.label}
-                </motion.a>
-              ))}
+              {navLinks.map((link, i) =>
+                link.href ? (
+                  <motion.div
+                    key={link.href}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.04 }}
+                  >
+                    <Link
+                      href={link.href}
+                      onClick={() => setMenuOpen(false)}
+                      className="block text-slate-700 font-medium py-3 px-4 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                    >
+                      {link.label}
+                    </Link>
+                  </motion.div>
+                ) : (
+                  <motion.a
+                    key={link.hash}
+                    href={isHome ? link.hash : `/${link.hash}`}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: i * 0.04 }}
+                    onClick={(e) => { e.preventDefault(); handleNavClick(link.hash!); }}
+                    className="text-slate-700 font-medium py-3 px-4 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                  >
+                    {link.label}
+                  </motion.a>
+                )
+              )}
               <div className="mt-3 pt-3 border-t border-slate-100 flex flex-col gap-2">
                 <a
                   href={`tel:${phone}`}
