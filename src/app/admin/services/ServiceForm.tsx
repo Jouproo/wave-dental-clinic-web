@@ -2,13 +2,19 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, CheckCircle2 } from "lucide-react";
+import {
+  Loader2, CheckCircle2,
+  Smile, Zap, Star, Sparkles, Shield, Layers, Droplets, Heart,
+  Activity, Aperture, Award, Crown, Cross, Anchor,
+  type LucideIcon,
+} from "lucide-react";
 import type { DbService } from "@/types/admin";
 
-const ICONS = [
-  "Smile", "Zap", "Star", "Sparkles", "Shield", "Layers",
-  "Droplets", "Heart", "Activity", "Aperture", "Award",
-];
+const ICON_MAP: Record<string, LucideIcon> = {
+  Smile, Zap, Star, Sparkles, Shield, Layers, Droplets, Heart,
+  Activity, Aperture, Award, Crown, Cross, Anchor,
+};
+const ICONS = Object.keys(ICON_MAP);
 
 type FormData = {
   id: string;
@@ -102,9 +108,28 @@ export default function ServiceForm({ initial, isNew }: ServiceFormProps) {
             />
           </Field>
           <Field label="الأيقونة">
-            <select value={form.icon} onChange={(e) => handleField("icon", e.target.value)} className="input">
-              {ICONS.map((i) => <option key={i} value={i}>{i}</option>)}
-            </select>
+            <div className="flex flex-wrap gap-2">
+              {ICONS.map((i) => {
+                const IconPreview = ICON_MAP[i];
+                const active = form.icon === i;
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    title={i}
+                    aria-pressed={active}
+                    onClick={() => handleField("icon", i)}
+                    className={`w-10 h-10 rounded-xl border flex items-center justify-center transition-colors ${
+                      active
+                        ? "bg-blue-600 border-blue-600 text-white"
+                        : "bg-white border-gray-200 text-slate-500 hover:border-blue-300 hover:text-blue-600"
+                    }`}
+                  >
+                    <IconPreview className="w-5 h-5" />
+                  </button>
+                );
+              })}
+            </div>
           </Field>
           <Field label="نص زر الخدمة">
             <input

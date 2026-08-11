@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Pencil, Trash2, Images, Stethoscope } from "lucide-react";
+import { Pencil, Trash2, Images, Stethoscope, ArrowUp, ArrowDown } from "lucide-react";
 import type { DbService } from "@/types/admin";
 
 export default function ServicesTable({ services }: { services: DbService[] }) {
@@ -11,6 +11,25 @@ export default function ServicesTable({ services }: { services: DbService[] }) {
   async function handleDelete(id: string, title: string) {
     if (!confirm(`هل أنت متأكد من حذف "${title}"؟`)) return;
     await fetch(`/api/admin/services/${id}`, { method: "DELETE" });
+    router.refresh();
+  }
+
+  async function handleMove(index: number, direction: -1 | 1) {
+    const other = services[index + direction];
+    const current = services[index];
+    if (!other) return;
+    await Promise.all([
+      fetch(`/api/admin/services/${current.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ display_order: other.display_order }),
+      }),
+      fetch(`/api/admin/services/${other.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ display_order: current.display_order }),
+      }),
+    ]);
     router.refresh();
   }
 
@@ -35,7 +54,7 @@ export default function ServicesTable({ services }: { services: DbService[] }) {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-50">
-          {services.map((svc) => (
+          {services.map((svc, index) => (
             <tr key={svc.id} className="hover:bg-gray-50 transition-colors">
               <td className="px-5 py-4">
                 <div>
@@ -50,7 +69,26 @@ export default function ServicesTable({ services }: { services: DbService[] }) {
                   {svc.status === "active" ? "نشطة" : "مخفية"}
                 </span>
               </td>
-              <td className="px-5 py-4 text-slate-500">{svc.display_order}</td>
+              <td className="px-5 py-4">
+                <div className="flex items-center gap-1.5 text-slate-500">
+                  <button
+                    onClick={() => handleMove(index, -1)}
+                    disabled={index === 0}
+                    title="تحريك لأعلى"
+                    className="p-1 rounded-lg hover:bg-gray-100 hover:text-blue-600 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-slate-500 transition-colors"
+                  >
+                    <ArrowUp className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => handleMove(index, 1)}
+                    disabled={index === services.length - 1}
+                    title="تحريك لأسفل"
+                    className="p-1 rounded-lg hover:bg-gray-100 hover:text-blue-600 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-slate-500 transition-colors"
+                  >
+                    <ArrowDown className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </td>
               <td className="px-5 py-4">
                 <div className="flex items-center gap-2">
                   <Link

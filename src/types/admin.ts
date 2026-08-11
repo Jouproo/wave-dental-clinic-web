@@ -30,6 +30,7 @@ export interface DbGallery {
   after_image_url: string | null;
   caption: string;
   display_order: number;
+  featured_home: boolean;
   created_at: string;
 }
 

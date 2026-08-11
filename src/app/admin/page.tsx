@@ -24,10 +24,10 @@ export default async function AdminHomePage() {
   const stats = await getStats().catch(() => ({ doctors: 0, services: 0, gallery: 0, heroSet: false }));
 
   const cards = [
-    { label: "الأطباء", value: stats.doctors, icon: Users, href: "/admin/doctors", color: "blue" },
-    { label: "الخدمات", value: stats.services, icon: Stethoscope, href: "/admin/services", color: "sky" },
-    { label: "معرض الصور", value: stats.gallery, icon: Images, href: "/admin/services", color: "indigo" },
-    { label: "صورة الهيرو", value: stats.heroSet ? "مضبوطة ✓" : "غير مضبوطة", icon: ImageIcon, href: "/admin/hero", color: "violet" },
+    { label: "الأطباء", value: stats.doctors, icon: Users, href: "/admin/doctors", iconBg: "bg-blue-100", iconColor: "text-blue-600" },
+    { label: "الخدمات", value: stats.services, icon: Stethoscope, href: "/admin/services", iconBg: "bg-sky-100", iconColor: "text-sky-600" },
+    { label: "معرض الصور", value: stats.gallery, icon: Images, href: "/admin/services", iconBg: "bg-indigo-100", iconColor: "text-indigo-600" },
+    { label: "صورة الهيرو", value: stats.heroSet ? "مضبوطة ✓" : "غير مضبوطة", icon: ImageIcon, href: "/admin/hero", iconBg: "bg-violet-100", iconColor: "text-violet-600" },
   ];
 
   return (
@@ -36,14 +36,14 @@ export default async function AdminHomePage() {
       <p className="text-slate-500 mb-8">إدارة محتوى موقع Wave Dental Clinic</p>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
-        {cards.map(({ label, value, icon: Icon, href, color }) => (
+        {cards.map(({ label, value, icon: Icon, href, iconBg, iconColor }) => (
           <Link
             key={label}
             href={href}
             className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-shadow flex flex-col gap-3"
           >
-            <div className={`w-10 h-10 rounded-xl bg-${color}-100 flex items-center justify-center`}>
-              <Icon className={`w-5 h-5 text-${color}-600`} />
+            <div className={`w-10 h-10 rounded-xl ${iconBg} flex items-center justify-center`}>
+              <Icon className={`w-5 h-5 ${iconColor}`} />
             </div>
             <div>
               <p className="text-2xl font-bold text-slate-800">{value}</p>

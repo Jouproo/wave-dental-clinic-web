@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Pencil, Trash2, UserCircle } from "lucide-react";
+import { Pencil, Trash2, UserCircle, ArrowUp, ArrowDown } from "lucide-react";
 import Image from "next/image";
 import type { DbDoctor } from "@/types/admin";
 
@@ -12,6 +12,25 @@ export default function DoctorsTable({ doctors }: { doctors: DbDoctor[] }) {
   async function handleDelete(id: string, name: string) {
     if (!confirm(`هل أنت متأكد من حذف "${name}"؟`)) return;
     await fetch(`/api/admin/doctors/${id}`, { method: "DELETE" });
+    router.refresh();
+  }
+
+  async function handleMove(index: number, direction: -1 | 1) {
+    const other = doctors[index + direction];
+    const current = doctors[index];
+    if (!other) return;
+    await Promise.all([
+      fetch(`/api/admin/doctors/${current.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ display_order: other.display_order }),
+      }),
+      fetch(`/api/admin/doctors/${other.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ display_order: current.display_order }),
+      }),
+    ]);
     router.refresh();
   }
 
@@ -37,7 +56,7 @@ export default function DoctorsTable({ doctors }: { doctors: DbDoctor[] }) {
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-50">
-          {doctors.map((doc) => (
+          {doctors.map((doc, index) => (
             <tr key={doc.id} className="hover:bg-gray-50 transition-colors">
               <td className="px-5 py-4">
                 <div className="flex items-center gap-3">
@@ -59,7 +78,26 @@ export default function DoctorsTable({ doctors }: { doctors: DbDoctor[] }) {
                   {doc.status === "active" ? "نشط" : "مخفي"}
                 </span>
               </td>
-              <td className="px-5 py-4 text-slate-500">{doc.display_order}</td>
+              <td className="px-5 py-4">
+                <div className="flex items-center gap-1.5 text-slate-500">
+                  <button
+                    onClick={() => handleMove(index, -1)}
+                    disabled={index === 0}
+                    title="تحريك لأعلى"
+                    className="p-1 rounded-lg hover:bg-gray-100 hover:text-blue-600 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-slate-500 transition-colors"
+                  >
+                    <ArrowUp className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => handleMove(index, 1)}
+                    disabled={index === doctors.length - 1}
+                    title="تحريك لأسفل"
+                    className="p-1 rounded-lg hover:bg-gray-100 hover:text-blue-600 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-slate-500 transition-colors"
+                  >
+                    <ArrowDown className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </td>
               <td className="px-5 py-4">
                 <div className="flex items-center gap-2">
                   <Link

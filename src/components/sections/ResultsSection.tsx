@@ -10,10 +10,11 @@ async function getRealCases(): Promise<ResultCase[]> {
       supabase
         .from("gallery")
         .select("*")
+        .eq("featured_home", true)
         .not("before_image_url", "is", null)
         .not("after_image_url", "is", null)
         .order("created_at", { ascending: false })
-        .limit(8),
+        .limit(12),
       supabase.from("services").select("id, title"),
     ]);
 

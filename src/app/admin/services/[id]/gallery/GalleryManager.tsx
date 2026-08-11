@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Upload, Trash2, Loader2, Plus } from "lucide-react";
+import { Upload, Trash2, Loader2, Plus, Star } from "lucide-react";
 import Image from "next/image";
 import type { DbGallery } from "@/types/admin";
 
@@ -95,8 +95,32 @@ export default function GalleryManager({ serviceId, initialItems }: GalleryManag
     router.refresh();
   }
 
+  async function toggleFeatured(id: string, current: boolean) {
+    // Optimistic update so the click feels instant
+    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, featured_home: !current } : i)));
+    const res = await fetch(`/api/admin/gallery/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ featured_home: !current }),
+    });
+    if (!res.ok) {
+      // revert on failure
+      setItems((prev) => prev.map((i) => (i.id === id ? { ...i, featured_home: current } : i)));
+      alert("فشل تحديث الحالة، حاول مرة أخرى");
+      return;
+    }
+    router.refresh();
+  }
+
   return (
     <div className="max-w-4xl space-y-6">
+      {items.length > 0 && (
+        <p className="flex items-center gap-2 text-sm text-slate-500 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+          <Star className="w-4 h-4 text-amber-500 flex-shrink-0" />
+          اضغط على النجمة لاختيار الحالات اللي تظهر في قسم &quot;حالات علاجية من عيادتنا&quot; بالصفحة الرئيسية.
+        </p>
+      )}
+
       {/* Existing pairs */}
       {items.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
@@ -120,15 +144,37 @@ export default function GalleryManager({ serviceId, initialItems }: GalleryManag
                   <span className="absolute top-2 right-2 bg-blue-600/80 text-white text-xs px-2 py-0.5 rounded-full">بعد</span>
                 </div>
               </div>
-              <div className="px-4 py-3 flex items-center justify-between">
-                <p className="text-sm text-slate-600">{item.caption || "—"}</p>
-                <button
-                  onClick={() => handleDelete(item.id)}
-                  className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+              <div className="px-4 py-3 flex items-center justify-between gap-2">
+                <p className="text-sm text-slate-600 truncate">{item.caption || "—"}</p>
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <button
+                    onClick={() => toggleFeatured(item.id, item.featured_home)}
+                    title={item.featured_home ? "إزالة من الرئيسية" : "إظهار في الرئيسية"}
+                    aria-pressed={item.featured_home}
+                    className={`p-1.5 rounded-lg transition-colors ${
+                      item.featured_home
+                        ? "text-amber-500 bg-amber-50 hover:bg-amber-100"
+                        : "text-slate-300 hover:text-amber-500 hover:bg-amber-50"
+                    }`}
+                  >
+                    <Star className="w-4 h-4" fill={item.featured_home ? "currentColor" : "none"} />
+                  </button>
+                  <button
+                    onClick={() => handleDelete(item.id)}
+                    className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
+              {item.featured_home && (
+                <div className="px-4 pb-3 -mt-1">
+                  <span className="inline-flex items-center gap-1 text-xs font-medium text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+                    <Star className="w-3 h-3" fill="currentColor" />
+                    ظاهرة في الرئيسية
+                  </span>
+                </div>
+              )}
             </div>
           ))}
         </div>

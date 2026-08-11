@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Home, Image, UserRound, Stethoscope, LogOut, Settings, Users } from "lucide-react";
+import { Home, Image, UserRound, Stethoscope, LogOut, Settings, Users, ExternalLink } from "lucide-react";
 import { clsx } from "clsx";
 
 const navItems = [
@@ -63,8 +63,17 @@ export default function AdminSidebar() {
         })}
       </nav>
 
-      {/* Logout */}
-      <div className="px-3 py-4 border-t border-gray-100">
+      {/* View site + Logout */}
+      <div className="px-3 py-4 border-t border-gray-100 space-y-1">
+        <a
+          href="/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-blue-50 hover:text-blue-600 transition-colors w-full"
+        >
+          <ExternalLink className="w-4 h-4 flex-shrink-0" />
+          عرض الموقع
+        </a>
         <button
           onClick={handleLogout}
           className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors w-full"
