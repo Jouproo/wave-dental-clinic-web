@@ -58,9 +58,9 @@ export default async function Home() {
         <BlogTeaserSection />
         <FinalCTASection settings={settings} />
       </main>
-      <Footer settings={settings} />
+      <Footer settings={settings} pageType="home" />
       <FloatingWhatsAppButton whatsapp={settings.whatsapp} />
-      <MobileStickyBar settings={settings} />
+      <MobileStickyBar settings={settings} pageType="home" />
     </>
   );
 }

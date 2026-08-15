@@ -5,6 +5,7 @@ import { MessageCircle, MapPin, CalendarCheck, Sparkles } from "lucide-react";
 import { clinicConfig } from "@/config/clinic";
 import { makeWhatsAppUrl, defaultSettings } from "@/lib/clinic-settings";
 import type { DbClinicSettings } from "@/types/admin";
+import { trackAnalyticsEvent } from "@/lib/analytics";
 
 interface FinalCTASectionProps {
   settings?: DbClinicSettings;
@@ -13,6 +14,7 @@ interface FinalCTASectionProps {
 export default function FinalCTASection({ settings = defaultSettings }: FinalCTASectionProps) {
   const whatsappUrl = makeWhatsAppUrl(settings.whatsapp || clinicConfig.whatsappNumber);
   const mapsUrl = settings.google_maps_direction_url || clinicConfig.googleMapsDirectionUrl;
+  const isExternalBooking = Boolean(clinicConfig.bookingUrl);
   const bookingUrl = clinicConfig.bookingUrl || whatsappUrl;
 
   return (
@@ -52,6 +54,7 @@ export default function FinalCTASection({ settings = defaultSettings }: FinalCTA
               rel="noopener noreferrer"
               whileHover={{ scale: 1.06 }}
               whileTap={{ scale: 0.96 }}
+              onClick={() => trackAnalyticsEvent("whatsapp_click", { contact_method: "whatsapp", cta_location: "final_cta", page_type: "home" })}
               className="flex items-center justify-center gap-2 bg-gradient-to-l from-green-600 to-green-500 text-white font-black px-8 py-4 rounded-xl shadow-lg shadow-green-900/30 hover:shadow-green-900/50 transition-shadow text-base"
             >
               <MessageCircle className="w-5 h-5" />
@@ -64,6 +67,7 @@ export default function FinalCTASection({ settings = defaultSettings }: FinalCTA
               rel="noopener noreferrer"
               whileHover={{ scale: 1.06 }}
               whileTap={{ scale: 0.96 }}
+              onClick={() => trackAnalyticsEvent("directions_click", { contact_method: "maps", cta_location: "final_cta", page_type: "home" })}
               className="flex items-center justify-center gap-2 bg-white/10 border border-white/25 text-white font-semibold px-8 py-4 rounded-xl hover:bg-white/20 transition-colors"
             >
               <MapPin className="w-5 h-5" />
@@ -76,6 +80,11 @@ export default function FinalCTASection({ settings = defaultSettings }: FinalCTA
               rel="noopener noreferrer"
               whileHover={{ scale: 1.06 }}
               whileTap={{ scale: 0.96 }}
+              onClick={() =>
+                isExternalBooking
+                  ? trackAnalyticsEvent("booking_start", { cta_location: "final_cta", page_type: "home" })
+                  : trackAnalyticsEvent("whatsapp_click", { contact_method: "whatsapp", cta_location: "final_cta", page_type: "home" })
+              }
               className="flex items-center justify-center gap-2 bg-gradient-to-l from-blue-500 to-sky-500 text-white font-semibold px-8 py-4 rounded-xl shadow-lg shadow-blue-900/30 hover:shadow-blue-900/50 transition-shadow"
             >
               <CalendarCheck className="w-5 h-5" />

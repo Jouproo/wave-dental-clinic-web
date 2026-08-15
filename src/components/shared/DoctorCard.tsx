@@ -6,6 +6,7 @@ import { clinicConfig } from "@/config/clinic";
 import { makeWhatsAppUrl } from "@/lib/clinic-settings";
 import type { Doctor } from "@/data/doctors";
 import Image from "next/image";
+import { trackAnalyticsEvent } from "@/lib/analytics";
 
 interface DoctorCardProps {
   doctor: Doctor;
@@ -58,6 +59,7 @@ export default function DoctorCard({ doctor, index, clinicWhatsapp }: DoctorCard
           href={whatsappUrl}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={() => trackAnalyticsEvent("whatsapp_click", { contact_method: "whatsapp", cta_location: "doctor_section", page_type: "home" })}
           className="flex items-center justify-center gap-2 w-full bg-green-50 hover:bg-green-100 text-green-700 font-semibold py-2.5 rounded-xl transition-colors text-sm border border-green-200"
         >
           <MessageCircle className="w-4 h-4" />

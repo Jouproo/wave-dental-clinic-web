@@ -13,6 +13,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import FloatingWhatsAppButton from "@/components/shared/FloatingWhatsAppButton";
 import MobileStickyBar from "@/components/shared/MobileStickyBar";
+import TrackedLink from "@/components/analytics/TrackedLink";
 import { getClinicSettings, makeWhatsAppUrl } from "@/lib/clinic-settings";
 import Image from "next/image";
 import Link from "next/link";
@@ -220,7 +221,9 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
             <h2 className="text-2xl font-bold text-slate-800 mb-3">هل أنت مهتم بهذه الخدمة؟</h2>
             <p className="text-slate-500 mb-8">تواصل معنا الآن لحجز موعد أو الاستفسار عن التفاصيل</p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              <a
+              <TrackedLink
+                event="whatsapp_click"
+                eventParams={{ cta_location: "service_page", page_type: "service" }}
                 href={makeWhatsAppUrl(settings.whatsapp, `أريد الاستفسار عن خدمة ${service.title}`)}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -228,7 +231,7 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
               >
                 <MessageCircle className="w-5 h-5" />
                 احجز عبر واتساب
-              </a>
+              </TrackedLink>
               <Link
                 href="/#services"
                 className="flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-semibold px-6 py-3.5 rounded-xl transition-colors border border-blue-200"
@@ -241,9 +244,9 @@ export default async function ServiceDetailPage({ params }: { params: Promise<{ 
         </section>
       </main>
 
-      <Footer settings={settings} />
+      <Footer settings={settings} pageType="service" />
       <FloatingWhatsAppButton whatsapp={settings.whatsapp} />
-      <MobileStickyBar settings={settings} />
+      <MobileStickyBar settings={settings} pageType="service" />
     </div>
   );
 }

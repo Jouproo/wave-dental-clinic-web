@@ -2,6 +2,7 @@ import { Phone } from "lucide-react";
 import { clinicConfig } from "@/config/clinic";
 import { makeWhatsAppUrl, defaultSettings } from "@/lib/clinic-settings";
 import type { DbClinicSettings } from "@/types/admin";
+import TrackedLink from "@/components/analytics/TrackedLink";
 
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
@@ -13,9 +14,10 @@ function WhatsAppIcon({ className }: { className?: string }) {
 
 interface MobileStickyBarProps {
   settings?: DbClinicSettings;
+  pageType?: string;
 }
 
-export default function MobileStickyBar({ settings = defaultSettings }: MobileStickyBarProps) {
+export default function MobileStickyBar({ settings = defaultSettings, pageType = "other_public" }: MobileStickyBarProps) {
   const phone = settings.phone || clinicConfig.phoneNumber;
   const whatsappUrl = makeWhatsAppUrl(settings.whatsapp || clinicConfig.whatsappNumber);
 
@@ -24,14 +26,18 @@ export default function MobileStickyBar({ settings = defaultSettings }: MobileSt
       className="md:hidden fixed bottom-0 inset-x-0 z-40 grid grid-cols-2 border-t border-slate-200 bg-white/95 backdrop-blur-md shadow-[0_-4px_16px_rgba(0,0,0,0.06)]"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
     >
-      <a
+      <TrackedLink
+        event="phone_click"
+        eventParams={{ cta_location: "mobile_sticky_bar", page_type: pageType }}
         href={`tel:${phone}`}
         className="flex items-center justify-center gap-2 py-3.5 min-h-[52px] text-slate-700 font-semibold border-l border-slate-100 active:bg-slate-50"
       >
         <Phone className="w-5 h-5" />
         اتصل الآن
-      </a>
-      <a
+      </TrackedLink>
+      <TrackedLink
+        event="whatsapp_click"
+        eventParams={{ cta_location: "mobile_sticky_bar", page_type: pageType }}
         href={whatsappUrl}
         target="_blank"
         rel="noopener noreferrer"
@@ -39,7 +45,7 @@ export default function MobileStickyBar({ settings = defaultSettings }: MobileSt
       >
         <WhatsAppIcon className="w-5 h-5" />
         واتساب
-      </a>
+      </TrackedLink>
     </div>
   );
 }

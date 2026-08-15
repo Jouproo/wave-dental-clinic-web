@@ -6,6 +6,7 @@ import SectionHeader from "@/components/shared/SectionHeader";
 import { clinicConfig } from "@/config/clinic";
 import { makeWhatsAppUrl, defaultSettings } from "@/lib/clinic-settings";
 import type { DbClinicSettings } from "@/types/admin";
+import { trackAnalyticsEvent } from "@/lib/analytics";
 
 interface LocationSectionProps {
   settings?: DbClinicSettings;
@@ -103,6 +104,7 @@ export default function LocationSection({ settings = defaultSettings }: Location
                 href={mapsDirectionUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => trackAnalyticsEvent("directions_click", { contact_method: "maps", cta_location: "contact_section", page_type: "home" })}
                 className="flex items-center justify-center gap-2 bg-gradient-to-l from-blue-600 to-sky-500 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-shadow"
               >
                 <Navigation className="w-5 h-5" />
@@ -111,6 +113,7 @@ export default function LocationSection({ settings = defaultSettings }: Location
               <div className="grid grid-cols-2 gap-3">
                 <a
                   href={`tel:${phone}`}
+                  onClick={() => trackAnalyticsEvent("phone_click", { contact_method: "phone", cta_location: "contact_section", page_type: "home" })}
                   className="flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 rounded-xl transition-colors"
                 >
                   <Phone className="w-4 h-4" />
@@ -120,6 +123,7 @@ export default function LocationSection({ settings = defaultSettings }: Location
                   href={whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => trackAnalyticsEvent("whatsapp_click", { contact_method: "whatsapp", cta_location: "contact_section", page_type: "home" })}
                   className="flex items-center justify-center gap-2 bg-green-100 hover:bg-green-200 text-green-700 font-semibold py-3 rounded-xl transition-colors"
                 >
                   <MessageCircle className="w-4 h-4" />

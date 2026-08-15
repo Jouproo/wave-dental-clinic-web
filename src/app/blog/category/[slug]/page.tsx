@@ -98,9 +98,9 @@ export default async function BlogCategoryPage({
           )}
         </div>
       </main>
-      <Footer settings={settings} />
+      <Footer settings={settings} pageType="other_public" />
       <FloatingWhatsAppButton whatsapp={settings.whatsapp} />
-      <MobileStickyBar settings={settings} />
+      <MobileStickyBar settings={settings} pageType="other_public" />
     </div>
   );
 }

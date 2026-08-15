@@ -3,6 +3,7 @@ import { Cairo } from "next/font/google";
 import "./globals.css";
 import { clinicConfig } from "@/config/clinic";
 import MotionProvider from "@/components/shared/MotionProvider";
+import AnalyticsProvider from "@/components/analytics/AnalyticsProvider";
 import { supabaseServer } from "@/lib/supabase";
 import { services as staticServices } from "@/data/services";
 
@@ -143,6 +144,7 @@ export default function RootLayout({
     <html lang="ar" dir="rtl" className={cairo.variable}>
       <body className={`${cairo.className} antialiased bg-white text-slate-900`}>
         <ClinicJsonLd />
+        <AnalyticsProvider />
         <MotionProvider>{children}</MotionProvider>
       </body>
     </html>

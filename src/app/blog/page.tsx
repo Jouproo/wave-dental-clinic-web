@@ -8,6 +8,7 @@ import FloatingWhatsAppButton from "@/components/shared/FloatingWhatsAppButton";
 import MobileStickyBar from "@/components/shared/MobileStickyBar";
 import BlogSearchBar from "@/components/blog/BlogSearchBar";
 import BlogPostCard from "@/components/blog/BlogPostCard";
+import BlogSearchTracker from "@/components/analytics/BlogSearchTracker";
 import { getPublishedPosts, getActiveCategories } from "@/lib/blog";
 import { getClinicSettings, makeWhatsAppUrl } from "@/lib/clinic-settings";
 import { clinicConfig } from "@/config/clinic";
@@ -51,6 +52,7 @@ export default async function BlogIndexPage({
 
   return (
     <div className="min-h-screen bg-white" dir="rtl">
+      <BlogSearchTracker searchQuery={sp.search} resultCount={total} />
       <Header settings={settings} />
       <main className="pt-24 pb-[68px] md:pb-0">
         {/* Hero */}
@@ -185,9 +187,9 @@ export default async function BlogIndexPage({
           </div>
         </section>
       </main>
-      <Footer settings={settings} />
+      <Footer settings={settings} pageType="blog_index" />
       <FloatingWhatsAppButton whatsapp={settings.whatsapp} />
-      <MobileStickyBar settings={settings} />
+      <MobileStickyBar settings={settings} pageType="blog_index" />
     </div>
   );
 }

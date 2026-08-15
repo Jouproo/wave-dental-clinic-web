@@ -5,6 +5,8 @@ import { sanitizeArticleHtml, extractHeadingsAndInjectIds, estimateReadingTime }
 import { getWhatsAppUrl } from "@/config/clinic";
 import { services as staticServices } from "@/data/services";
 import type { BlogPostWithRelations } from "@/types/blog";
+import TrackedLink from "@/components/analytics/TrackedLink";
+import ArticleReadTracker from "@/components/analytics/ArticleReadTracker";
 
 function formatDate(iso: string | null) {
   if (!iso) return null;
@@ -121,9 +123,11 @@ export default function ArticleView({
 
         {/* Body */}
         <div
+          id="article-body"
           className="prose prose-slate max-w-none prose-headings:font-bold prose-a:text-blue-600 prose-img:rounded-2xl"
           dangerouslySetInnerHTML={{ __html: htmlWithIds }}
         />
+        <ArticleReadTracker targetId="article-body" />
 
         {/* Sources */}
         {post.sources.length > 0 && (
@@ -170,21 +174,25 @@ export default function ArticleView({
           </h2>
           <p className="text-white/80 text-sm mb-5">تواصل معنا وسيتم الرد على استفسارك بخطوات واضحة قبل أي قرار.</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <a
+            <TrackedLink
+              event="article_cta_click"
+              eventParams={{ cta_location: "article_footer", contact_method: "whatsapp", page_type: "blog_article" }}
               href={whatsappUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 bg-white text-blue-700 font-bold px-6 py-3 rounded-xl hover:bg-blue-50 transition-colors"
             >
               <MessageCircle className="w-5 h-5" /> تواصل عبر واتساب
-            </a>
+            </TrackedLink>
             {post.related_service_id && (
-              <Link
+              <TrackedLink
+                event="article_cta_click"
+                eventParams={{ cta_location: "article_footer_service_link", page_type: "blog_article" }}
                 href={`/services/${post.related_service_id}`}
                 className="flex items-center justify-center gap-2 bg-white/10 border border-white/30 text-white font-semibold px-6 py-3 rounded-xl hover:bg-white/20 transition-colors"
               >
                 <ArrowRight className="w-4 h-4" /> تفاصيل الخدمة
-              </Link>
+              </TrackedLink>
             )}
           </div>
         </section>

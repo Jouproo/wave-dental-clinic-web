@@ -118,9 +118,9 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
       <main className="pt-24 pb-[68px] md:pb-0">
         <ArticleView post={post} />
       </main>
-      <Footer settings={settings} />
+      <Footer settings={settings} pageType="blog_article" />
       <FloatingWhatsAppButton whatsapp={settings.whatsapp} />
-      <MobileStickyBar settings={settings} />
+      <MobileStickyBar settings={settings} pageType="blog_article" />
     </div>
   );
 }

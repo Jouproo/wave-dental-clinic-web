@@ -4,6 +4,7 @@ import Link from "next/link";
 import { clinicConfig } from "@/config/clinic";
 import { makeWhatsAppUrl, defaultSettings } from "@/lib/clinic-settings";
 import type { DbClinicSettings } from "@/types/admin";
+import TrackedLink from "@/components/analytics/TrackedLink";
 
 function WhatsAppIcon({ className }: { className?: string }) {
   return (
@@ -15,9 +16,11 @@ function WhatsAppIcon({ className }: { className?: string }) {
 
 interface FooterProps {
   settings?: DbClinicSettings;
+  /** Static per-page classification for analytics — each page.tsx knows its own type. */
+  pageType?: string;
 }
 
-export default function Footer({ settings = defaultSettings }: FooterProps) {
+export default function Footer({ settings = defaultSettings, pageType = "other_public" }: FooterProps) {
   const year = new Date().getFullYear();
   const phone = settings.phone || clinicConfig.phoneNumber;
   const address = settings.address || clinicConfig.address;
@@ -72,10 +75,12 @@ export default function Footer({ settings = defaultSettings }: FooterProps) {
                   <Instagram className="w-4 h-4" />
                 </a>
               )}
-              <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"
+              <TrackedLink
+                href={whatsappUrl} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"
+                event="whatsapp_click" eventParams={{ contact_method: "whatsapp", cta_location: "footer", page_type: pageType }}
                 className="w-9 h-9 rounded-lg bg-slate-800 hover:bg-green-600 flex items-center justify-center transition-colors">
                 <WhatsAppIcon className="w-4 h-4" />
-              </a>
+              </TrackedLink>
             </div>
           </div>
 
@@ -115,9 +120,12 @@ export default function Footer({ settings = defaultSettings }: FooterProps) {
               </li>
               <li className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-blue-400 flex-shrink-0" />
-                <a href={`tel:${phone}`} className="text-sm text-slate-400 hover:text-blue-400 transition-colors" dir="ltr">
+                <TrackedLink
+                  href={`tel:${phone}`}
+                  event="phone_click" eventParams={{ contact_method: "phone", cta_location: "footer", page_type: pageType }}
+                  className="text-sm text-slate-400 hover:text-blue-400 transition-colors" dir="ltr">
                   {phone}
-                </a>
+                </TrackedLink>
               </li>
               <li className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-blue-400 flex-shrink-0" />

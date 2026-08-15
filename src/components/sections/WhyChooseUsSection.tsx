@@ -6,6 +6,7 @@ import SectionHeader from "@/components/shared/SectionHeader";
 import { clinicConfig } from "@/config/clinic";
 import { makeWhatsAppUrl, defaultSettings } from "@/lib/clinic-settings";
 import type { DbClinicSettings } from "@/types/admin";
+import { trackAnalyticsEvent } from "@/lib/analytics";
 
 const benefits = [
   {
@@ -103,6 +104,7 @@ export default function WhyChooseUsSection({ settings = defaultSettings }: WhyCh
               rel="noopener noreferrer"
               whileHover={{ scale: 1.04 }}
               whileTap={{ scale: 0.96 }}
+              onClick={() => trackAnalyticsEvent("whatsapp_click", { contact_method: "whatsapp", cta_location: "why_us_section", page_type: "home" })}
               className="inline-flex items-center gap-2 bg-gradient-to-l from-blue-600 to-sky-500 text-white font-bold px-7 py-4 rounded-xl shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-shadow"
             >
               احجز موعدك الآن

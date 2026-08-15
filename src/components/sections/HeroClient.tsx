@@ -6,6 +6,7 @@ import { clinicConfig } from "@/config/clinic";
 import { makeWhatsAppUrl, defaultSettings } from "@/lib/clinic-settings";
 import type { DbClinicSettings } from "@/types/admin";
 import Image from "next/image";
+import { trackAnalyticsEvent } from "@/lib/analytics";
 
 const trustPoints = [
   { icon: CheckCircle, label: "أطباء متخصصون" },
@@ -98,6 +99,7 @@ export default function HeroClient({ heroImageUrl, settings = defaultSettings }:
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.96 }}
+                onClick={() => trackAnalyticsEvent("whatsapp_click", { contact_method: "whatsapp", cta_location: "hero", page_type: "home" })}
                 className="flex items-center justify-center gap-2 bg-gradient-to-l from-green-600 to-green-500 text-white font-bold px-7 py-4 rounded-xl shadow-lg shadow-green-900/30 hover:shadow-green-900/50 transition-shadow text-base"
               >
                 <MessageCircle className="w-5 h-5" />
@@ -110,6 +112,7 @@ export default function HeroClient({ heroImageUrl, settings = defaultSettings }:
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.04 }}
                 whileTap={{ scale: 0.96 }}
+                onClick={() => trackAnalyticsEvent("directions_click", { contact_method: "maps", cta_location: "hero", page_type: "home" })}
                 className="flex items-center justify-center gap-2 bg-white/10 backdrop-blur-sm border border-white/25 text-white font-semibold px-7 py-4 rounded-xl hover:bg-white/20 transition-colors text-base"
               >
                 <MapPin className="w-5 h-5" />

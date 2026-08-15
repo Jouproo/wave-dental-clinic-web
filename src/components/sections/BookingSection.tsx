@@ -5,6 +5,7 @@ import { CalendarCheck, MessageCircle } from "lucide-react";
 import { clinicConfig } from "@/config/clinic";
 import { makeWhatsAppUrl, defaultSettings } from "@/lib/clinic-settings";
 import type { DbClinicSettings } from "@/types/admin";
+import { trackAnalyticsEvent } from "@/lib/analytics";
 
 interface BookingSectionProps {
   settings?: DbClinicSettings;
@@ -47,6 +48,11 @@ export default function BookingSection({ settings = defaultSettings }: BookingSe
               rel="noopener noreferrer"
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.96 }}
+              onClick={() =>
+                isExternalBooking
+                  ? trackAnalyticsEvent("booking_start", { cta_location: "booking_section", page_type: "home" })
+                  : trackAnalyticsEvent("whatsapp_click", { contact_method: "whatsapp", cta_location: "booking_section", page_type: "home" })
+              }
               className="flex items-center justify-center gap-2 bg-white text-blue-700 font-black px-8 py-4 rounded-xl shadow-xl hover:bg-blue-50 transition-colors text-lg"
             >
               {isExternalBooking ? (
@@ -63,6 +69,7 @@ export default function BookingSection({ settings = defaultSettings }: BookingSe
                 rel="noopener noreferrer"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.96 }}
+                onClick={() => trackAnalyticsEvent("whatsapp_click", { contact_method: "whatsapp", cta_location: "booking_section", page_type: "home" })}
                 className="flex items-center justify-center gap-2 bg-green-500 text-white font-bold px-8 py-4 rounded-xl shadow-lg hover:bg-green-600 transition-colors"
               >
                 <MessageCircle className="w-5 h-5" />

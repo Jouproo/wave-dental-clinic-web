@@ -9,6 +9,7 @@ import { usePathname } from "next/navigation";
 import { clinicConfig } from "@/config/clinic";
 import { makeWhatsAppUrl, defaultSettings } from "@/lib/clinic-settings";
 import type { DbClinicSettings } from "@/types/admin";
+import { trackAnalyticsEvent, derivePageType } from "@/lib/analytics";
 
 const navLinks: { label: string; hash?: string; href?: string }[] = [
   { label: "الرئيسية",   hash: "#hero" },
@@ -35,6 +36,7 @@ export default function Header({ settings = defaultSettings }: HeaderProps) {
 
   const phone = settings.phone || clinicConfig.phoneNumber;
   const whatsappUrl = makeWhatsAppUrl(settings.whatsapp || clinicConfig.whatsappNumber);
+  const pageType = derivePageType(pathname);
 
   useEffect(() => {
     if (!isHome) return;
@@ -117,6 +119,7 @@ export default function Header({ settings = defaultSettings }: HeaderProps) {
             <div className="hidden lg:flex items-center gap-3">
               <a
                 href={`tel:${phone}`}
+                onClick={() => trackAnalyticsEvent("phone_click", { contact_method: "phone", cta_location: "header", page_type: pageType })}
                 className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${
                   scrolled ? "text-slate-600 hover:text-blue-600" : "text-white/90 hover:text-white"
                 }`}
@@ -128,6 +131,7 @@ export default function Header({ settings = defaultSettings }: HeaderProps) {
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() => trackAnalyticsEvent("whatsapp_click", { contact_method: "whatsapp", cta_location: "header", page_type: pageType })}
                 className="bg-gradient-to-l from-blue-600 to-sky-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-shadow"
               >
                 احجز الآن
@@ -193,6 +197,7 @@ export default function Header({ settings = defaultSettings }: HeaderProps) {
               <div className="mt-3 pt-3 border-t border-slate-100 flex flex-col gap-2">
                 <a
                   href={`tel:${phone}`}
+                  onClick={() => trackAnalyticsEvent("phone_click", { contact_method: "phone", cta_location: "mobile_menu", page_type: pageType })}
                   className="flex items-center justify-center gap-2 py-3 rounded-xl bg-slate-50 text-slate-700 font-medium"
                 >
                   <Phone className="w-4 h-4" />
@@ -202,6 +207,7 @@ export default function Header({ settings = defaultSettings }: HeaderProps) {
                   href={whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => trackAnalyticsEvent("whatsapp_click", { contact_method: "whatsapp", cta_location: "mobile_menu", page_type: pageType })}
                   className="flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-l from-blue-600 to-sky-500 text-white font-bold"
                 >
                   احجز الآن
