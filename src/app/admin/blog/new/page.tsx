@@ -6,9 +6,10 @@ import PostForm from "../PostForm";
 
 export default async function NewBlogPostPage() {
   const supabase = supabaseServer();
-  const [categoriesRes, authorsRes, servicesRes, postsRes] = await Promise.all([
+  const [categoriesRes, authorsRes, doctorsRes, servicesRes, postsRes] = await Promise.all([
     supabase.from("blog_categories").select("*").eq("status", "active").order("sort_order"),
     supabase.from("blog_authors").select("*").eq("status", "active").order("name_ar"),
+    supabase.from("doctors").select("*").eq("status", "active").order("display_order"),
     supabase.from("services").select("id, title").eq("status", "active"),
     supabase.from("blog_posts").select("id, title").eq("status", "published"),
   ]);
@@ -20,6 +21,7 @@ export default async function NewBlogPostPage() {
       <PostForm
         categories={categoriesRes.data ?? []}
         authors={authorsRes.data ?? []}
+        doctors={doctorsRes.data ?? []}
         services={servicesRes.data?.length ? servicesRes.data : staticServices.map((s) => ({ id: s.id, title: s.title }))}
         otherPublishedPosts={postsRes.data ?? []}
       />

@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { slugify } from "@/lib/blog-utils";
 import type { DbBlogCategory, DbBlogAuthor, DbBlogPost, BlogPostStatus } from "@/types/blog";
+import type { DbDoctor } from "@/types/admin";
 
 const RichTextEditor = dynamic(() => import("@/components/admin/RichTextEditor"), {
   ssr: false,
@@ -52,12 +53,13 @@ interface PostFormProps {
   postId?: string;
   categories: DbBlogCategory[];
   authors: DbBlogAuthor[];
+  doctors: DbDoctor[];
   services: { id: string; title: string }[];
   otherPublishedPosts: { id: string; title: string }[];
 }
 
 export default function PostForm({
-  initial, postId, categories, authors, services, otherPublishedPosts,
+  initial, postId, categories, authors, doctors, services, otherPublishedPosts,
 }: PostFormProps) {
   const router = useRouter();
   const isNew = !postId;
@@ -90,6 +92,46 @@ export default function PostForm({
   const [sources, setSources] = useState<SourceRow[]>(initial?.sources?.length ? initial.sources : []);
   const [faqs, setFaqs] = useState<FaqRow[]>(initial?.faqs?.length ? initial.faqs : []);
   const [relatedIds, setRelatedIds] = useState<string[]>(initial?.related_post_ids ?? []);
+
+  // Author/reviewer selects offer registered doctors directly; picking one
+  // auto-provisions (or reuses) its blog_authors byline behind the scenes,
+  // so the admin never has to pre-create one via /admin/blog/authors first.
+  const [authorsList, setAuthorsList] = useState<DbBlogAuthor[]>(authors);
+  const [resolvingPerson, setResolvingPerson] = useState<"author_id" | "reviewer_id" | null>(null);
+  const otherAuthors = authorsList.filter((a) => !a.linked_doctor_id);
+
+  function personSelectKey(id: string): string {
+    if (!id) return "";
+    const a = authorsList.find((x) => x.id === id);
+    if (a?.linked_doctor_id) return `doctor:${a.linked_doctor_id}`;
+    return a ? `author:${id}` : "";
+  }
+
+  async function handlePersonChange(field: "author_id" | "reviewer_id", key: string) {
+    if (!key) { set(field, ""); return; }
+    const [kind, id] = key.split(":");
+    if (kind === "author") { set(field, id); return; }
+
+    const already = authorsList.find((a) => a.linked_doctor_id === id);
+    if (already) { set(field, already.id); return; }
+
+    setResolvingPerson(field);
+    try {
+      const res = await fetch("/api/admin/blog/authors/link-doctor", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ doctor_id: id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "فشل ربط الطبيب");
+      setAuthorsList((prev) => (prev.some((a) => a.id === data.id) ? prev : [...prev, data]));
+      set(field, data.id);
+    } catch {
+      setError("تعذر إضافة الطبيب المحدد");
+    } finally {
+      setResolvingPerson(null);
+    }
+  }
 
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -257,16 +299,44 @@ export default function PostForm({
               {services.map((s) => <option key={s.id} value={s.id}>{s.title}</option>)}
             </select>
           </Field>
-          <Field label="الكاتب">
-            <select value={form.author_id} onChange={(e) => set("author_id", e.target.value)} className="input">
+          <Field label="الكاتب" hint={resolvingPerson === "author_id" ? "جارٍ الإضافة..." : undefined}>
+            <select
+              value={personSelectKey(form.author_id)}
+              onChange={(e) => handlePersonChange("author_id", e.target.value)}
+              disabled={resolvingPerson === "author_id"}
+              className="input"
+            >
               <option value="">— غير محدد —</option>
-              {authors.map((a) => <option key={a.id} value={a.id}>{a.name_ar}</option>)}
+              {doctors.length > 0 && (
+                <optgroup label="الأطباء المسجلون">
+                  {doctors.map((d) => <option key={d.id} value={`doctor:${d.id}`}>{d.name} — {d.specialty}</option>)}
+                </optgroup>
+              )}
+              {otherAuthors.length > 0 && (
+                <optgroup label="كتّاب آخرون">
+                  {otherAuthors.map((a) => <option key={a.id} value={`author:${a.id}`}>{a.name_ar}</option>)}
+                </optgroup>
+              )}
             </select>
           </Field>
-          <Field label="المراجع الطبي">
-            <select value={form.reviewer_id} onChange={(e) => set("reviewer_id", e.target.value)} className="input">
+          <Field label="المراجع الطبي" hint={resolvingPerson === "reviewer_id" ? "جارٍ الإضافة..." : undefined}>
+            <select
+              value={personSelectKey(form.reviewer_id)}
+              onChange={(e) => handlePersonChange("reviewer_id", e.target.value)}
+              disabled={resolvingPerson === "reviewer_id"}
+              className="input"
+            >
               <option value="">— بدون مراجعة طبية —</option>
-              {authors.map((a) => <option key={a.id} value={a.id}>{a.name_ar}</option>)}
+              {doctors.length > 0 && (
+                <optgroup label="الأطباء المسجلون">
+                  {doctors.map((d) => <option key={d.id} value={`doctor:${d.id}`}>{d.name} — {d.specialty}</option>)}
+                </optgroup>
+              )}
+              {otherAuthors.length > 0 && (
+                <optgroup label="مراجعون آخرون">
+                  {otherAuthors.map((a) => <option key={a.id} value={`author:${a.id}`}>{a.name_ar}</option>)}
+                </optgroup>
+              )}
             </select>
           </Field>
         </div>
