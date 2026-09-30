@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { GoogleTagManager } from "@next/third-parties/google";
 import { isPublicRoute } from "@/lib/analytics";
 import AnalyticsPageView from "./AnalyticsPageView";
+import AdsConversionTracking from "./AdsConversionTracking";
 
 /**
  * The only place GTM gets mounted. The project has a single root layout
@@ -32,6 +33,7 @@ export default function AnalyticsProvider() {
         />
       </noscript>
       <AnalyticsPageView />
+      <AdsConversionTracking />
     </>
   );
 }
