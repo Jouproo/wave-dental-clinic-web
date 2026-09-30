@@ -9,8 +9,32 @@ import { getPublishedPostBySlug } from "@/lib/blog";
 import { getClinicSettings } from "@/lib/clinic-settings";
 import { clinicConfig } from "@/config/clinic";
 import { stripHtml } from "@/lib/blog-utils";
+import { supabaseServer } from "@/lib/supabase";
 
-export const dynamic = "force-dynamic";
+// Was force-dynamic: every hit re-ran the Supabase query, HTML sanitize,
+// and full render, which kept the dyno pinned near its memory ceiling
+// under bot/crawler traffic. Matches the 5-minute ISR window already
+// used by "/" and "/services/[id]" — publishDuePosts() (called inside
+// getPublishedPostBySlug) still runs on each regeneration, so scheduled
+// posts go live within the same window as before.
+export const revalidate = 300;
+
+// Without generateStaticParams, Next treats a [slug] route as fully
+// dynamic (no Full Route Cache) even with `revalidate` set — confirmed
+// by comparing response headers against /services/[id], which has this
+// and correctly returns `x-nextjs-cache: HIT`. Posts published after
+// this list was built at deploy time still render fine on first visit
+// (dynamicParams defaults to true) and get cached from then on.
+export async function generateStaticParams() {
+  try {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return [];
+    const supabase = supabaseServer();
+    const { data } = await supabase.from("blog_posts").select("slug").eq("status", "published");
+    return (data ?? []).map((p) => ({ slug: p.slug }));
+  } catch {
+    return [];
+  }
+}
 
 export async function generateMetadata({
   params,

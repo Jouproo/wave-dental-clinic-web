@@ -37,6 +37,19 @@ export function slugify(input: string): string {
   return `post-${Math.random().toString(36).slice(2, 8)}`;
 }
 
+/**
+ * Cleans an admin-supplied slug before it's trusted. A pasted full URL
+ * (e.g. "https://site.com/blog/my-post") must collapse to its last path
+ * segment before slugify() runs — otherwise the domain/path survive as
+ * literal slug text and the post becomes unreachable at its real
+ * /blog/[slug] address (this happened in production: a post's slug was
+ * saved as "wavedentelclinic.com/blog/orthodontic-treatment-6-october").
+ */
+export function sanitizeSlug(input: string): string {
+  const lastSegment = input.split("/").filter(Boolean).pop() ?? input;
+  return slugify(lastSegment);
+}
+
 export function stripHtml(html: string): string {
   return html.replace(/<[^>]*>/g, " ").replace(/\s+/g, " ").trim();
 }

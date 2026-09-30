@@ -1,5 +1,5 @@
 import { supabaseServer } from "@/lib/supabase";
-import { slugify, sanitizeArticleHtml, extractHeadingsAndInjectIds } from "@/lib/blog-utils";
+import { slugify, sanitizeSlug, sanitizeArticleHtml, extractHeadingsAndInjectIds } from "@/lib/blog-utils";
 
 /**
  * Builds an UPDATE/INSERT payload from only the keys actually present in
@@ -25,7 +25,7 @@ export function buildPostFields(body: Record<string, unknown>, existingSlug?: st
   if ("slug" in body || "title" in body) {
     const explicitSlug = (body.slug as string)?.trim();
     const titleForSlug = (body.title as string) ?? "";
-    fields.slug = explicitSlug || existingSlug || slugify(titleForSlug);
+    fields.slug = (explicitSlug && sanitizeSlug(explicitSlug)) || existingSlug || slugify(titleForSlug);
   }
 
   if ("excerpt" in body) fields.excerpt = (body.excerpt as string) ?? null;
