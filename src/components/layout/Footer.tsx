@@ -142,7 +142,11 @@ export default function Footer({ settings = defaultSettings, pageType = "other_p
         </div>
 
         <div className="border-t border-slate-800 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-slate-500 text-sm">© {year} {clinicConfig.clinicName}. جميع الحقوق محفوظة.</p>
+          <p className="text-slate-500 text-sm">
+            © {year} {clinicConfig.clinicName}. جميع الحقوق محفوظة.
+            <span className="mx-2 text-slate-700">|</span>
+            <Link href="/privacy-policy" className="hover:text-blue-400 transition-colors">سياسة الخصوصية</Link>
+          </p>
           <p className="text-slate-600 text-xs">تصميم وتطوير احترافي لعيادات الأسنان</p>
         </div>
       </div>
