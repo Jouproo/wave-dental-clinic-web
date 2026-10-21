@@ -6,6 +6,7 @@ import MotionProvider from "@/components/shared/MotionProvider";
 import AnalyticsProvider from "@/components/analytics/AnalyticsProvider";
 import { supabaseServer } from "@/lib/supabase";
 import { services as staticServices } from "@/data/services";
+import { doctors as staticDoctors } from "@/data/doctors";
 
 const cairo = Cairo({
   subsets: ["arabic", "latin"],
@@ -69,10 +70,37 @@ async function getActiveServicesForSchema(): Promise<{ id: string; title: string
   }
 }
 
+interface DoctorForSchema {
+  id: string;
+  name: string;
+  specialty: string;
+  bio: string;
+  image_url?: string | null;
+}
+
+async function getActiveDoctorsForSchema(): Promise<DoctorForSchema[]> {
+  try {
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) return staticDoctors;
+    const supabase = supabaseServer();
+    const { data, error } = await supabase
+      .from("doctors")
+      .select("id, name, specialty, bio, image_url")
+      .eq("status", "active")
+      .order("display_order", { ascending: true });
+    if (error || !data || data.length === 0) return staticDoctors;
+    return data;
+  } catch {
+    return staticDoctors;
+  }
+}
+
 async function ClinicJsonLd() {
   const url = clinicConfig.seo.url;
   const logo = `${url}/images/web_logo.png`;
-  const services = await getActiveServicesForSchema();
+  const [services, doctors] = await Promise.all([
+    getActiveServicesForSchema(),
+    getActiveDoctorsForSchema(),
+  ]);
   const jsonLd = {
     "@context": "https://schema.org",
     "@graph": [
@@ -115,6 +143,7 @@ async function ClinicJsonLd() {
         ...(clinicConfig.socialLinks.facebook
           ? { sameAs: [clinicConfig.socialLinks.facebook] }
           : {}),
+        employee: doctors.map((d) => ({ "@id": `${url}/#doctor-${d.id}` })),
       },
       {
         "@type": "WebSite",
@@ -124,6 +153,15 @@ async function ClinicJsonLd() {
         inLanguage: "ar-EG",
         publisher: { "@id": `${url}/#clinic` },
       },
+      ...doctors.map((d) => ({
+        "@type": "Physician",
+        "@id": `${url}/#doctor-${d.id}`,
+        name: d.name,
+        medicalSpecialty: d.specialty,
+        description: d.bio,
+        ...(d.image_url ? { image: d.image_url } : {}),
+        worksFor: { "@id": `${url}/#clinic` },
+      })),
     ],
   };
 

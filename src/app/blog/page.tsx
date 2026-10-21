@@ -54,7 +54,7 @@ export default async function BlogIndexPage({
     <div className="min-h-screen bg-white" dir="rtl">
       <BlogSearchTracker searchQuery={sp.search} resultCount={total} />
       <Header settings={settings} />
-      <main className="pt-24 pb-[68px] md:pb-0">
+      <main className="pt-24 pb-[88px] md:pb-0">
         {/* Hero */}
         <section className="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 py-14 md:py-20 px-4">
           <div className="max-w-3xl mx-auto text-center">

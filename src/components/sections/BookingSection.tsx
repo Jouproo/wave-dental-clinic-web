@@ -15,12 +15,16 @@ export default function BookingSection({ settings = defaultSettings }: BookingSe
   const whatsappUrl = makeWhatsAppUrl(settings.whatsapp || clinicConfig.whatsappNumber);
   const isExternalBooking = Boolean(clinicConfig.bookingUrl);
   const primaryBookingUrl = clinicConfig.bookingUrl || whatsappUrl;
+  // "External" here means "not the WhatsApp fallback" — the booking URL
+  // itself may be an internal page (e.g. /book), which should open in the
+  // same tab rather than a new one.
+  const primaryOpensInNewTab = primaryBookingUrl.startsWith("http");
 
   return (
-    <section id="booking" className="py-14 md:py-20 lg:py-24 bg-gradient-to-br from-blue-600 to-sky-600 relative overflow-hidden">
+    <section id="booking" className="py-16 md:py-20 lg:py-28 bg-gradient-to-br from-brand-700 to-brand-500 relative overflow-hidden bg-noise">
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute -top-20 -right-20 w-72 h-72 bg-white/5 rounded-full blur-3xl" />
-        <div className="absolute -bottom-20 -left-20 w-72 h-72 bg-white/5 rounded-full blur-3xl" />
+        <div className="animate-aurora absolute -top-20 -right-20 w-72 h-72 bg-white/10 rounded-full blur-3xl" />
+        <div className="animate-aurora absolute -bottom-20 -left-20 w-72 h-72 bg-white/10 rounded-full blur-3xl [animation-delay:3s]" />
       </div>
 
       <div className="relative z-10 max-w-3xl mx-auto px-4 sm:px-6 text-center">
@@ -30,11 +34,11 @@ export default function BookingSection({ settings = defaultSettings }: BookingSe
           viewport={{ once: true }}
           transition={{ duration: 0.7 }}
         >
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/20 rounded-2xl mb-6 mx-auto">
+          <div className="inline-flex items-center justify-center w-16 h-16 glass-dark rounded-2xl mb-6 mx-auto">
             <CalendarCheck className="w-8 h-8 text-white" />
           </div>
 
-          <h2 className="text-3xl md:text-4xl font-black text-white mb-4">احجز موعدك الآن</h2>
+          <h2 className="text-3xl md:text-4xl font-black text-white mb-4 tracking-tight">احجز موعدك الآن</h2>
           <p className="text-white/80 text-lg mb-8 leading-relaxed">
             {isExternalBooking
               ? "احجز موعدك بسهولة عبر نظام الحجز الإلكتروني الخاص بنا."
@@ -44,16 +48,16 @@ export default function BookingSection({ settings = defaultSettings }: BookingSe
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <motion.a
               href={primaryBookingUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              whileHover={{ scale: 1.05 }}
+              target={primaryOpensInNewTab ? "_blank" : undefined}
+              rel={primaryOpensInNewTab ? "noopener noreferrer" : undefined}
+              whileHover={{ scale: 1.04, y: -2 }}
               whileTap={{ scale: 0.96 }}
               onClick={() =>
                 isExternalBooking
                   ? trackAnalyticsEvent("booking_start", { cta_location: "booking_section", page_type: "home" })
                   : trackAnalyticsEvent("whatsapp_click", { contact_method: "whatsapp", cta_location: "booking_section", page_type: "home" })
               }
-              className="flex items-center justify-center gap-2 bg-white text-blue-700 font-black px-8 py-4 rounded-xl shadow-xl hover:bg-blue-50 transition-colors text-lg"
+              className="flex items-center justify-center gap-2 bg-white text-brand-700 font-black px-8 py-4 rounded-2xl shadow-xl hover:shadow-2xl transition-shadow text-lg"
             >
               {isExternalBooking ? (
                 <><CalendarCheck className="w-5 h-5" />احجز موعدك الآن</>
@@ -67,10 +71,10 @@ export default function BookingSection({ settings = defaultSettings }: BookingSe
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                whileHover={{ scale: 1.05 }}
+                whileHover={{ scale: 1.04, y: -2 }}
                 whileTap={{ scale: 0.96 }}
                 onClick={() => trackAnalyticsEvent("whatsapp_click", { contact_method: "whatsapp", cta_location: "booking_section", page_type: "home" })}
-                className="flex items-center justify-center gap-2 bg-green-500 text-white font-bold px-8 py-4 rounded-xl shadow-lg hover:bg-green-600 transition-colors"
+                className="flex items-center justify-center gap-2 bg-gradient-to-l from-green-600 to-[#25D366] text-white font-bold px-8 py-4 rounded-2xl shadow-lg hover:shadow-xl transition-shadow"
               >
                 <MessageCircle className="w-5 h-5" />
                 أو تواصل واتساب

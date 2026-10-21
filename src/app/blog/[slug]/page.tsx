@@ -139,7 +139,7 @@ export default async function BlogArticlePage({ params }: { params: Promise<{ sl
     <div className="min-h-screen bg-white" dir="rtl">
       <ArticleJsonLd post={post} slug={slug} />
       <Header settings={settings} />
-      <main className="pt-24 pb-[68px] md:pb-0">
+      <main className="pt-24 pb-[88px] md:pb-0">
         <ArticleView post={post} />
       </main>
       <Footer settings={settings} pageType="blog_article" />

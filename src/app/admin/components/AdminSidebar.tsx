@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Home, Image, UserRound, Stethoscope, LogOut, Settings, Users, ExternalLink, Newspaper } from "lucide-react";
+import { Home, Image, UserRound, Stethoscope, LogOut, Settings, Users, ExternalLink, Newspaper, CalendarCheck } from "lucide-react";
 import { clsx } from "clsx";
 
 const navItems = [
   { href: "/admin", label: "الرئيسية", icon: Home, exact: true },
+  { href: "/admin/bookings", label: "الحجوزات", icon: CalendarCheck, exact: false },
   { href: "/admin/hero", label: "الهيرو", icon: Image, exact: false },
   { href: "/admin/doctors", label: "الأطباء", icon: UserRound, exact: false },
   { href: "/admin/services", label: "الخدمات", icon: Stethoscope, exact: false },

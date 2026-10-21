@@ -27,7 +27,7 @@ export default function SectionHeader({
       viewport={{ once: true }}
       transition={{ duration: 0.6 }}
       className={cn(
-        "mb-8 md:mb-12",
+        "mb-10 md:mb-14",
         centered && "text-center",
         className
       )}
@@ -35,19 +35,25 @@ export default function SectionHeader({
       {badge && (
         <span
           className={cn(
-            "inline-block text-sm font-semibold px-4 py-1.5 rounded-full mb-4",
+            "inline-flex items-center gap-2 text-xs sm:text-sm font-bold px-4 py-1.5 rounded-full mb-4 tracking-wide",
             light
-              ? "bg-white/20 text-white"
-              : "bg-blue-100 text-blue-700"
+              ? "bg-white/10 text-white border border-white/20"
+              : "bg-brand-50 text-brand-700 border border-brand-100"
           )}
         >
+          <span
+            className={cn(
+              "w-1.5 h-1.5 rounded-full",
+              light ? "bg-brand-300" : "bg-brand-500"
+            )}
+          />
           {badge}
         </span>
       )}
       <h2
         className={cn(
-          "text-3xl md:text-4xl font-bold leading-tight mb-4",
-          light ? "text-white" : "text-slate-800"
+          "text-[1.9rem] sm:text-4xl md:text-[2.75rem] font-black leading-[1.15] tracking-tight mb-4",
+          light ? "text-white" : "text-ink-900"
         )}
       >
         {title}
@@ -55,9 +61,9 @@ export default function SectionHeader({
       {subtitle && (
         <p
           className={cn(
-            "text-lg max-w-2xl leading-relaxed",
+            "text-base md:text-lg max-w-2xl leading-relaxed",
             centered && "mx-auto",
-            light ? "text-white/80" : "text-slate-500"
+            light ? "text-white/75" : "text-ink-500"
           )}
         >
           {subtitle}

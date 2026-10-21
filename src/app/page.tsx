@@ -5,6 +5,7 @@ import Footer from "@/components/layout/Footer";
 import FloatingWhatsAppButton from "@/components/shared/FloatingWhatsAppButton";
 import HeroSection from "@/components/sections/HeroSection";
 import ServicesSection from "@/components/sections/ServicesSection";
+import ImplantDiagnosisPromoSection from "@/components/sections/ImplantDiagnosisPromoSection";
 import WhyChooseUsSection from "@/components/sections/WhyChooseUsSection";
 import PatientJourneySection from "@/components/sections/PatientJourneySection";
 import DoctorsSection from "@/components/sections/DoctorsSection";
@@ -44,9 +45,10 @@ export default async function Home() {
     <>
       <FaqJsonLd />
       <Header settings={settings} />
-      <main className="pb-[68px] md:pb-0">
+      <main className="pb-[88px] md:pb-0">
         <HeroSection settings={settings} />
         <ServicesSection />
+        <ImplantDiagnosisPromoSection />
         <WhyChooseUsSection settings={settings} />
         <PatientJourneySection />
         <DoctorsSection settings={settings} />

@@ -29,7 +29,7 @@ export default function LocationSection({ settings = defaultSettings }: Location
   const whatsappUrl = makeWhatsAppUrl(settings.whatsapp || clinicConfig.whatsappNumber);
 
   return (
-    <section id="location" className="py-14 md:py-20 lg:py-24 bg-white">
+    <section id="location" className="py-16 md:py-20 lg:py-28 bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeader
           badge="موقعنا"
@@ -44,7 +44,7 @@ export default function LocationSection({ settings = defaultSettings }: Location
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
-            className="rounded-2xl overflow-hidden shadow-xl border border-slate-100 bg-slate-100"
+            className="rounded-[1.75rem] overflow-hidden shadow-xl border border-slate-100 bg-slate-100"
             style={{ height: 380 }}
           >
             {mapsEmbedUrl ? (
@@ -59,9 +59,9 @@ export default function LocationSection({ settings = defaultSettings }: Location
                 title="موقع العيادة على خرائط جوجل"
               />
             ) : (
-              <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 to-blue-50 text-slate-400">
-                <MapPin className="w-16 h-16 mb-3 text-blue-300" />
-                <p className="font-medium text-slate-500">سيتم تحديث موقع العيادة قريبًا</p>
+              <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 to-brand-50 text-slate-400">
+                <MapPin className="w-16 h-16 mb-3 text-brand-300" />
+                <p className="font-medium text-ink-500">سيتم تحديث موقع العيادة قريبًا</p>
                 <p className="text-sm text-slate-400 mt-1">{address}</p>
               </div>
             )}
@@ -75,26 +75,26 @@ export default function LocationSection({ settings = defaultSettings }: Location
             transition={{ duration: 0.7, delay: 0.1 }}
             className="flex flex-col gap-5"
           >
-            <div className="bg-gradient-to-br from-blue-50 to-sky-50 rounded-2xl p-5 border border-blue-100">
+            <div className="bg-gradient-to-br from-brand-50 to-mist-50 rounded-[1.5rem] p-5 border border-brand-100">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center flex-shrink-0">
+                <div className="w-11 h-11 rounded-2xl bg-brand-500 flex items-center justify-center flex-shrink-0">
                   <MapPin className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-800 mb-1">عنوان العيادة</h3>
-                  <p className="text-slate-600 text-sm">{address}</p>
+                  <h3 className="font-bold text-ink-900 mb-1">عنوان العيادة</h3>
+                  <p className="text-ink-600 text-sm">{address}</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
+            <div className="bg-mist-50 rounded-[1.5rem] p-5 border border-slate-100">
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center flex-shrink-0">
+                <div className="w-11 h-11 rounded-2xl bg-amber-500 flex items-center justify-center flex-shrink-0">
                   <Clock className="w-5 h-5 text-white" />
                 </div>
                 <div>
-                  <h3 className="font-bold text-slate-800 mb-1">مواعيد العمل</h3>
-                  <p className="text-slate-600 text-sm">{workingHours}</p>
+                  <h3 className="font-bold text-ink-900 mb-1">مواعيد العمل</h3>
+                  <p className="text-ink-600 text-sm">{workingHours}</p>
                 </div>
               </div>
             </div>
@@ -105,7 +105,7 @@ export default function LocationSection({ settings = defaultSettings }: Location
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => trackAnalyticsEvent("directions_click", { contact_method: "maps", cta_location: "contact_section", page_type: "home" })}
-                className="flex items-center justify-center gap-2 bg-gradient-to-l from-blue-600 to-sky-500 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg transition-shadow"
+                className="flex items-center justify-center gap-2 bg-gradient-to-l from-brand-600 to-brand-400 text-white font-bold py-4 rounded-2xl shadow-lg shadow-brand-600/20 hover:shadow-xl hover:shadow-brand-600/30 transition-shadow"
               >
                 <Navigation className="w-5 h-5" />
                 افتح الموقع على Google Maps
@@ -114,7 +114,7 @@ export default function LocationSection({ settings = defaultSettings }: Location
                 <a
                   href={`tel:${phone}`}
                   onClick={() => trackAnalyticsEvent("phone_click", { contact_method: "phone", cta_location: "contact_section", page_type: "home" })}
-                  className="flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-3 rounded-xl transition-colors"
+                  className="flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-ink-700 font-semibold py-3.5 rounded-2xl transition-colors"
                 >
                   <Phone className="w-4 h-4" />
                   اتصل بنا
@@ -124,7 +124,7 @@ export default function LocationSection({ settings = defaultSettings }: Location
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => trackAnalyticsEvent("whatsapp_click", { contact_method: "whatsapp", cta_location: "contact_section", page_type: "home" })}
-                  className="flex items-center justify-center gap-2 bg-green-100 hover:bg-green-200 text-green-700 font-semibold py-3 rounded-xl transition-colors"
+                  className="flex items-center justify-center gap-2 bg-green-50 hover:bg-green-100 text-green-700 font-semibold py-3.5 rounded-2xl transition-colors"
                 >
                   <MessageCircle className="w-4 h-4" />
                   واتساب

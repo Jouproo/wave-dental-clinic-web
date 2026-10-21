@@ -27,31 +27,35 @@ export default function ServiceCard({ service, index }: ServiceCardProps) {
       initial={{ opacity: 0, y: 30 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: index * 0.08 }}
+      transition={{ duration: 0.5, delay: index * 0.06 }}
       whileHover={{ y: -6 }}
       className="h-full"
     >
       <Link
         href={`/services/${service.id}`}
-        className="group flex h-full flex-col bg-white rounded-2xl md:rounded-3xl p-5 md:p-6 border border-slate-100 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all duration-300"
+        className="group relative flex h-full flex-col bg-white rounded-[1.75rem] p-6 border border-slate-100 shadow-[0_2px_10px_-4px_rgba(15,23,42,0.08)] hover:shadow-[0_20px_40px_-12px_rgba(22,114,214,0.25)] hover:border-brand-200 transition-all duration-300 overflow-hidden"
       >
+        <span className="absolute top-5 left-5 text-5xl font-black text-slate-50 group-hover:text-brand-50 transition-colors select-none" aria-hidden="true">
+          {String(index + 1).padStart(2, "0")}
+        </span>
+
         <div
           aria-hidden="true"
-          className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-100 to-sky-100 flex items-center justify-center mb-4 group-hover:from-blue-500 group-hover:to-sky-500 transition-all duration-300"
+          className="relative z-10 w-14 h-14 rounded-2xl bg-gradient-to-br from-brand-50 to-brand-100 flex items-center justify-center mb-5 group-hover:from-brand-600 group-hover:to-brand-400 group-hover:shadow-lg group-hover:shadow-brand-500/30 transition-all duration-300"
         >
-          <Icon className="w-6 h-6 text-blue-600 group-hover:text-white transition-colors duration-300" />
+          <Icon className="w-7 h-7 text-brand-600 group-hover:text-white transition-colors duration-300" />
         </div>
 
-        <h3 className="text-lg md:text-xl font-bold leading-7 text-slate-800 mb-2">
+        <h3 className="relative z-10 text-lg md:text-xl font-bold leading-7 text-ink-900 mb-2">
           {service.title}
         </h3>
-        <p className="text-sm md:text-base leading-7 text-slate-500">
+        <p className="relative z-10 text-sm md:text-base leading-7 text-ink-500">
           {service.description}
         </p>
 
-        <span className="mt-auto pt-4 text-sm font-semibold text-blue-600 flex items-center gap-1">
+        <span className="relative z-10 mt-auto pt-5 text-sm font-bold text-brand-600 flex items-center gap-1.5">
           <span>تفاصيل الخدمة</span>
-          <span className="group-hover:-translate-x-1 transition-transform duration-200" aria-hidden="true">←</span>
+          <span className="group-hover:-translate-x-1.5 transition-transform duration-200" aria-hidden="true">←</span>
         </span>
       </Link>
     </motion.article>

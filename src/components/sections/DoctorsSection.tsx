@@ -45,7 +45,7 @@ export default async function DoctorsSection({ settings }: DoctorsSectionProps) 
   const doctors = await getDoctors();
 
   return (
-    <section id="doctors" className="py-14 md:py-20 lg:py-24 bg-gradient-to-br from-slate-50 to-blue-50">
+    <section id="doctors" className="py-16 md:py-20 lg:py-28 bg-mist-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <SectionHeader
           badge="فريقنا الطبي"
@@ -53,9 +53,11 @@ export default async function DoctorsSection({ settings }: DoctorsSectionProps) 
           subtitle="فريق طبي متكامل من أكثر الأطباء خبرةً وتخصصًا لضمان أفضل نتائج لحالتك."
         />
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="flex gap-5 overflow-x-auto snap-x snap-mandatory no-scrollbar -mx-4 px-4 pb-2 sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-6 sm:overflow-visible sm:mx-0 sm:px-0 sm:pb-0">
           {doctors.map((doctor, i) => (
-            <DoctorCard key={doctor.id} doctor={doctor} index={i} clinicWhatsapp={settings?.whatsapp} />
+            <div key={doctor.id} className="min-w-[82%] sm:min-w-0 snap-start">
+              <DoctorCard doctor={doctor} index={i} clinicWhatsapp={settings?.whatsapp} />
+            </div>
           ))}
         </div>
       </div>

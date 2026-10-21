@@ -42,7 +42,7 @@ export default async function PrivacyPolicyPage() {
   return (
     <div className="min-h-screen bg-white" dir="rtl">
       <Header settings={settings} />
-      <main className="pt-24 pb-[68px] md:pb-0">
+      <main className="pt-24 pb-[88px] md:pb-0">
         <section className="bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 py-12 md:py-16 px-4">
           <div className="max-w-3xl mx-auto text-center">
             <span className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 text-white/90 text-sm font-medium px-4 py-2 rounded-full mb-5">

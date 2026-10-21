@@ -53,7 +53,7 @@ export default async function BlogCategoryPage({
   return (
     <div className="min-h-screen bg-white" dir="rtl">
       <Header settings={settings} />
-      <main className="pt-24 pb-[68px] md:pb-0">
+      <main className="pt-24 pb-[88px] md:pb-0">
         <nav aria-label="Breadcrumb" className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 text-sm text-slate-500">
           <ol className="flex items-center gap-1.5 flex-wrap">
             <li><Link href="/" className="hover:text-blue-600">الرئيسية</Link></li>

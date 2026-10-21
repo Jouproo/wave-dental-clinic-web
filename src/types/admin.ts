@@ -52,6 +52,37 @@ export interface DbAdminUser {
   created_at: string;
 }
 
+export type BookingRequestType = "appointment" | "implant_diagnosis";
+
+export type BookingStatus =
+  | "new"
+  | "contacted"
+  | "in_review"
+  | "diagnosed"
+  | "completed"
+  | "cancelled";
+
+export interface DbBookingRequest {
+  id: string;
+  request_type: BookingRequestType;
+  name: string;
+  phone: string;
+  age: number | null;
+  service_id: string | null;
+  preferred_date: string | null;
+  preferred_time: string | null;
+  message: string | null;
+  xray_paths: string[];
+  consent_given: boolean;
+  status: BookingStatus;
+  diagnosis_notes: string | null;
+  diagnosed_by: string | null;
+  diagnosed_at: string | null;
+  submitter_ip: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface DbClinicSettings {
   id: number;
   phone: string;

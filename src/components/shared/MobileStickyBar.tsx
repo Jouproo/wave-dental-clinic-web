@@ -1,4 +1,4 @@
-import { Phone } from "lucide-react";
+import { Phone, Navigation } from "lucide-react";
 import { clinicConfig } from "@/config/clinic";
 import { makeWhatsAppUrl, defaultSettings } from "@/lib/clinic-settings";
 import type { DbClinicSettings } from "@/types/admin";
@@ -20,32 +20,46 @@ interface MobileStickyBarProps {
 export default function MobileStickyBar({ settings = defaultSettings, pageType = "other_public" }: MobileStickyBarProps) {
   const phone = settings.phone || clinicConfig.phoneNumber;
   const whatsappUrl = makeWhatsAppUrl(settings.whatsapp || clinicConfig.whatsappNumber);
+  const mapsUrl = settings.google_maps_direction_url || clinicConfig.googleMapsDirectionUrl;
 
   return (
     <div
-      className="md:hidden fixed bottom-0 inset-x-0 z-40 grid grid-cols-2 border-t border-slate-200 bg-white/95 backdrop-blur-md shadow-[0_-4px_16px_rgba(0,0,0,0.06)]"
-      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      className="md:hidden fixed bottom-0 inset-x-0 z-40 px-3 pb-3"
+      style={{ paddingBottom: "max(0.75rem, env(safe-area-inset-bottom))" }}
     >
-      <TrackedLink
-        event="phone_click"
-        eventParams={{ cta_location: "mobile_sticky_bar", page_type: pageType }}
-        href={`tel:${phone}`}
-        className="flex items-center justify-center gap-2 py-3.5 min-h-[52px] text-slate-700 font-semibold border-l border-slate-100 active:bg-slate-50"
-      >
-        <Phone className="w-5 h-5" />
-        اتصل الآن
-      </TrackedLink>
-      <TrackedLink
-        event="whatsapp_click"
-        eventParams={{ cta_location: "mobile_sticky_bar", page_type: pageType }}
-        href={whatsappUrl}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="flex items-center justify-center gap-2 py-3.5 min-h-[52px] text-white font-semibold bg-[#25D366] active:bg-[#1fb959]"
-      >
-        <WhatsAppIcon className="w-5 h-5" />
-        واتساب
-      </TrackedLink>
+      <div className="grid grid-cols-3 rounded-2xl overflow-hidden border border-slate-200/70 bg-white/95 backdrop-blur-md shadow-[0_10px_30px_-6px_rgba(15,23,42,0.18)]">
+        <TrackedLink
+          event="directions_click"
+          eventParams={{ contact_method: "maps", cta_location: "mobile_sticky_bar", page_type: pageType }}
+          href={mapsUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex flex-col items-center justify-center gap-0.5 py-2.5 min-h-[56px] text-ink-600 font-semibold text-[11px] border-l border-slate-100 active:bg-slate-50"
+        >
+          <Navigation className="w-5 h-5" />
+          موقعنا
+        </TrackedLink>
+        <TrackedLink
+          event="whatsapp_click"
+          eventParams={{ cta_location: "mobile_sticky_bar", page_type: pageType }}
+          href={whatsappUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex flex-col items-center justify-center gap-0.5 py-2.5 min-h-[56px] text-white font-bold text-[11px] bg-gradient-to-b from-[#2bd470] to-[#25D366] active:brightness-95 border-l border-slate-100"
+        >
+          <WhatsAppIcon className="w-5 h-5" />
+          واتساب
+        </TrackedLink>
+        <TrackedLink
+          event="phone_click"
+          eventParams={{ cta_location: "mobile_sticky_bar", page_type: pageType }}
+          href={`tel:${phone}`}
+          className="flex flex-col items-center justify-center gap-0.5 py-2.5 min-h-[56px] text-ink-600 font-semibold text-[11px] active:bg-slate-50"
+        >
+          <Phone className="w-5 h-5" />
+          اتصل الآن
+        </TrackedLink>
+      </div>
     </div>
   );
 }

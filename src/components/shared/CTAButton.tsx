@@ -18,21 +18,21 @@ interface CTAButtonProps {
 
 const variantClasses = {
   primary:
-    "bg-gradient-to-l from-blue-600 to-sky-500 text-white shadow-lg shadow-blue-500/30 hover:shadow-blue-500/50 hover:from-blue-700 hover:to-sky-600",
+    "bg-gradient-to-l from-brand-600 to-brand-400 text-white shadow-lg shadow-brand-600/30 hover:shadow-xl hover:shadow-brand-600/40 hover:-translate-y-0.5",
   secondary:
-    "bg-white text-blue-700 border border-blue-200 shadow-md hover:bg-blue-50 hover:shadow-lg",
+    "bg-white text-brand-700 border border-brand-200 shadow-sm hover:bg-brand-50 hover:shadow-md hover:-translate-y-0.5",
   outline:
-    "bg-transparent text-white border-2 border-white hover:bg-white hover:text-blue-700",
+    "bg-transparent text-white border-2 border-white/70 hover:bg-white hover:text-brand-700",
   whatsapp:
-    "bg-gradient-to-l from-green-600 to-green-500 text-white shadow-lg shadow-green-500/30 hover:from-green-700 hover:to-green-600",
+    "bg-gradient-to-l from-green-600 to-[#25D366] text-white shadow-lg shadow-green-600/30 hover:shadow-xl hover:shadow-green-600/40 hover:-translate-y-0.5",
   ghost:
-    "bg-transparent text-blue-700 hover:bg-blue-50",
+    "bg-transparent text-brand-700 hover:bg-brand-50",
 };
 
 const sizeClasses = {
-  sm: "text-sm px-4 py-2 gap-1.5",
-  md: "text-base px-6 py-3 gap-2",
-  lg: "text-lg px-8 py-4 gap-2.5",
+  sm: "text-sm px-4 py-2.5 gap-1.5 rounded-xl",
+  md: "text-base px-6 py-3.5 gap-2 rounded-2xl",
+  lg: "text-lg px-8 py-[1.125rem] gap-2.5 rounded-2xl",
 };
 
 export default function CTAButton({
@@ -55,7 +55,7 @@ export default function CTAButton({
       whileTap={{ scale: 0.97 }}
       transition={{ type: "spring", stiffness: 400, damping: 20 }}
       className={cn(
-        "inline-flex items-center justify-center rounded-xl font-semibold transition-all duration-300 cursor-pointer",
+        "inline-flex items-center justify-center font-bold transition-all duration-300 cursor-pointer",
         variantClasses[variant],
         sizeClasses[size],
         fullWidth && "w-full",

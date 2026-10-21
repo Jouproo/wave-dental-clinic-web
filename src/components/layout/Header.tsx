@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, Phone } from "lucide-react";
+import { motion, AnimatePresence, useScroll } from "framer-motion";
+import { Menu, X, Phone, MessageCircle, ChevronLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -29,6 +29,7 @@ interface HeaderProps {
 export default function Header({ settings = defaultSettings }: HeaderProps) {
   const pathname = usePathname();
   const isHome = pathname === "/";
+  const { scrollYProgress } = useScroll();
 
   const [scrollY, setScrollY] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -46,6 +47,11 @@ export default function Header({ settings = defaultSettings }: HeaderProps) {
     return () => window.removeEventListener("scroll", onScroll);
   }, [isHome]);
 
+  useEffect(() => {
+    document.documentElement.style.overflow = menuOpen ? "hidden" : "";
+    return () => { document.documentElement.style.overflow = ""; };
+  }, [menuOpen]);
+
   function handleNavClick(hash: string) {
     setMenuOpen(false);
     if (isHome) {
@@ -58,13 +64,19 @@ export default function Header({ settings = defaultSettings }: HeaderProps) {
 
   return (
     <>
+      {/* Scroll progress indicator */}
+      <motion.div
+        style={{ scaleX: scrollYProgress }}
+        className="fixed top-0 right-0 left-0 h-[3px] origin-right bg-gradient-to-l from-brand-400 via-brand-600 to-brand-900 z-[60]"
+      />
+
       <motion.header
         initial={{ y: -80, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
         className={`fixed top-0 right-0 left-0 z-40 transition-all duration-300 ${
           scrolled
-            ? "bg-white/95 backdrop-blur-md shadow-md shadow-blue-900/5"
+            ? "bg-white/90 backdrop-blur-xl shadow-[0_1px_0_rgba(15,23,42,0.06),0_12px_30px_-10px_rgba(15,23,42,0.12)]"
             : "bg-transparent"
         }`}
       >
@@ -82,20 +94,26 @@ export default function Header({ settings = defaultSettings }: HeaderProps) {
                 alt="Wave Dental Clinic"
                 width={160}
                 height={50}
-                className={`h-12 w-auto object-contain transition-all ${scrolled ? "" : "brightness-0 invert"}`}
+                className={`h-11 md:h-12 w-auto object-contain transition-all ${scrolled ? "" : "brightness-0 invert"}`}
                 priority
               />
             </Link>
 
-            {/* Desktop Nav */}
-            <nav className="hidden lg:flex items-center gap-1">
+            {/* Desktop Nav — floating pill */}
+            <nav
+              className={`hidden lg:flex items-center gap-0.5 rounded-full p-1 transition-colors duration-300 ${
+                scrolled ? "bg-slate-100/70" : "bg-white/10 backdrop-blur-sm border border-white/15"
+              }`}
+            >
               {navLinks.map((link) =>
                 link.href ? (
                   <Link
                     key={link.href}
                     href={link.href}
-                    className={`text-sm font-medium px-3 py-2 rounded-lg transition-all hover:bg-blue-50 hover:text-blue-700 ${
-                      scrolled ? "text-slate-600" : "text-white/90 hover:text-blue-700"
+                    className={`text-sm font-semibold px-3.5 py-2 rounded-full transition-all ${
+                      scrolled
+                        ? "text-ink-600 hover:bg-white hover:text-brand-700 hover:shadow-sm"
+                        : "text-white/90 hover:bg-white/15 hover:text-white"
                     }`}
                   >
                     {link.label}
@@ -105,8 +123,10 @@ export default function Header({ settings = defaultSettings }: HeaderProps) {
                     key={link.hash}
                     href={isHome ? link.hash : `/${link.hash}`}
                     onClick={(e) => { e.preventDefault(); handleNavClick(link.hash!); }}
-                    className={`text-sm font-medium px-3 py-2 rounded-lg transition-all hover:bg-blue-50 hover:text-blue-700 ${
-                      scrolled ? "text-slate-600" : "text-white/90 hover:text-blue-700"
+                    className={`text-sm font-semibold px-3.5 py-2 rounded-full transition-all ${
+                      scrolled
+                        ? "text-ink-600 hover:bg-white hover:text-brand-700 hover:shadow-sm"
+                        : "text-white/90 hover:bg-white/15 hover:text-white"
                     }`}
                   >
                     {link.label}
@@ -120,100 +140,129 @@ export default function Header({ settings = defaultSettings }: HeaderProps) {
               <a
                 href={`tel:${phone}`}
                 onClick={() => trackAnalyticsEvent("phone_click", { contact_method: "phone", cta_location: "header", page_type: pageType })}
-                className={`flex items-center gap-1.5 text-sm font-medium transition-colors ${
-                  scrolled ? "text-slate-600 hover:text-blue-600" : "text-white/90 hover:text-white"
+                className={`flex items-center gap-1.5 text-sm font-semibold transition-colors ${
+                  scrolled ? "text-ink-600 hover:text-brand-600" : "text-white/90 hover:text-white"
                 }`}
               >
                 <Phone className="w-4 h-4" />
                 <span dir="ltr">{phone}</span>
               </a>
-              <a
+              <motion.a
                 href={whatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                whileHover={{ scale: 1.04 }}
+                whileTap={{ scale: 0.96 }}
                 onClick={() => trackAnalyticsEvent("whatsapp_click", { contact_method: "whatsapp", cta_location: "header", page_type: pageType })}
-                className="bg-gradient-to-l from-blue-600 to-sky-500 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 transition-shadow"
+                className="bg-gradient-to-l from-brand-600 to-brand-400 text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-lg shadow-brand-600/25 hover:shadow-brand-600/40 transition-shadow"
               >
                 احجز الآن
-              </a>
+              </motion.a>
             </div>
 
             {/* Mobile toggle */}
             <button
-              className="lg:hidden p-2 rounded-lg"
+              className={`lg:hidden relative w-11 h-11 flex items-center justify-center rounded-xl transition-colors ${
+                scrolled ? "text-ink-800" : "text-white"
+              } ${menuOpen ? "bg-brand-600 text-white" : ""}`}
               onClick={() => setMenuOpen(!menuOpen)}
-              aria-label="Toggle menu"
+              aria-label="فتح القائمة"
+              aria-expanded={menuOpen}
             >
-              {menuOpen
-                ? <X className={`w-6 h-6 ${scrolled ? "text-slate-800" : "text-white"}`} />
-                : <Menu className={`w-6 h-6 ${scrolled ? "text-slate-800" : "text-white"}`} />
-              }
+              {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
         </div>
       </motion.header>
 
-      {/* Mobile Menu */}
+      {/* Mobile Menu — full-screen overlay */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ duration: 0.25 }}
-            className="fixed top-16 right-0 left-0 z-30 bg-white/98 backdrop-blur-lg shadow-xl border-t border-slate-100 overflow-hidden lg:hidden"
+            className="fixed inset-0 z-50 lg:hidden bg-ink-900/95 backdrop-blur-xl bg-noise overflow-y-auto"
           >
-            <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-1">
+            <div className="flex items-center justify-between px-4 sm:px-6 h-16">
+              <Image
+                src="/images/web_logo.png"
+                alt="Wave Dental Clinic"
+                width={140}
+                height={44}
+                className="h-10 w-auto object-contain brightness-0 invert"
+              />
+              <button
+                className="w-11 h-11 flex items-center justify-center rounded-xl bg-white/10 text-white"
+                onClick={() => setMenuOpen(false)}
+                aria-label="إغلاق القائمة"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+
+            <nav className="px-5 sm:px-6 pt-6 pb-10 flex flex-col">
               {navLinks.map((link, i) =>
                 link.href ? (
                   <motion.div
                     key={link.href}
-                    initial={{ opacity: 0, x: 20 }}
+                    initial={{ opacity: 0, x: 24 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.04 }}
+                    transition={{ delay: 0.05 + i * 0.05 }}
+                    className="border-b border-white/10"
                   >
                     <Link
                       href={link.href}
                       onClick={() => setMenuOpen(false)}
-                      className="block text-slate-700 font-medium py-3 px-4 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                      className="flex items-center justify-between py-4 text-xl font-bold text-white/90 hover:text-white transition-colors"
                     >
                       {link.label}
+                      <ChevronLeft className="w-5 h-5 text-white/30" />
                     </Link>
                   </motion.div>
                 ) : (
                   <motion.a
                     key={link.hash}
                     href={isHome ? link.hash : `/${link.hash}`}
-                    initial={{ opacity: 0, x: 20 }}
+                    initial={{ opacity: 0, x: 24 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: i * 0.04 }}
+                    transition={{ delay: 0.05 + i * 0.05 }}
                     onClick={(e) => { e.preventDefault(); handleNavClick(link.hash!); }}
-                    className="text-slate-700 font-medium py-3 px-4 rounded-xl hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                    className="flex items-center justify-between py-4 text-xl font-bold text-white/90 hover:text-white border-b border-white/10 transition-colors"
                   >
                     {link.label}
+                    <ChevronLeft className="w-5 h-5 text-white/30" />
                   </motion.a>
                 )
               )}
-              <div className="mt-3 pt-3 border-t border-slate-100 flex flex-col gap-2">
-                <a
-                  href={`tel:${phone}`}
-                  onClick={() => trackAnalyticsEvent("phone_click", { contact_method: "phone", cta_location: "mobile_menu", page_type: pageType })}
-                  className="flex items-center justify-center gap-2 py-3 rounded-xl bg-slate-50 text-slate-700 font-medium"
-                >
-                  <Phone className="w-4 h-4" />
-                  <span dir="ltr">{phone}</span>
-                </a>
+
+              <motion.div
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="mt-8 flex flex-col gap-3"
+              >
                 <a
                   href={whatsappUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   onClick={() => trackAnalyticsEvent("whatsapp_click", { contact_method: "whatsapp", cta_location: "mobile_menu", page_type: pageType })}
-                  className="flex items-center justify-center gap-2 py-3 rounded-xl bg-gradient-to-l from-blue-600 to-sky-500 text-white font-bold"
+                  className="flex items-center justify-center gap-2 py-4 rounded-2xl bg-gradient-to-l from-green-600 to-[#25D366] text-white font-bold text-base shadow-lg shadow-green-900/30"
                 >
-                  احجز الآن
+                  <MessageCircle className="w-5 h-5" />
+                  احجز عبر واتساب
                 </a>
-              </div>
-            </div>
+                <a
+                  href={`tel:${phone}`}
+                  onClick={() => trackAnalyticsEvent("phone_click", { contact_method: "phone", cta_location: "mobile_menu", page_type: pageType })}
+                  className="flex items-center justify-center gap-2 py-4 rounded-2xl glass-dark text-white font-semibold text-base"
+                >
+                  <Phone className="w-4 h-4" />
+                  <span dir="ltr">{phone}</span>
+                </a>
+              </motion.div>
+            </nav>
           </motion.div>
         )}
       </AnimatePresence>

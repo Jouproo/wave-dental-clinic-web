@@ -27,8 +27,8 @@ export const clinicConfig = {
     "&output=embed",
   googleMapsDirectionUrl: "https://maps.app.goo.gl/TjgZSw2gbx5M14JX7?g_st=com.google.maps.preview.copy",
 
-  // Booking — change this later to your booking system URL
-  bookingUrl: "",
+  // Booking — the online booking form (src/app/book/page.tsx)
+  bookingUrl: "/book",
 
   // Social media
   socialLinks: {
