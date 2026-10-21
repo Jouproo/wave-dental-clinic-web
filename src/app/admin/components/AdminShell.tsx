@@ -23,6 +23,17 @@ export default function AdminShell({ children, session }: { children: React.Reac
     return () => window.removeEventListener("admin-sidebar-close", handler);
   }, []);
 
+  // Registering a service worker is one of the browser's required
+  // "installable PWA" criteria (alongside the manifest) — without it,
+  // Chrome/Android won't offer the native "Install app" option at all.
+  // Runs on every /admin page, including the login page, so installability
+  // doesn't depend on having logged in first.
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/admin-sw.js", { scope: "/admin/" }).catch(() => {});
+    }
+  }, []);
+
   if (pathname === "/admin/login" || !session) {
     return <>{children}</>;
   }
