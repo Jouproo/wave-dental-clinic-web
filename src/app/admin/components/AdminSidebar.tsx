@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { Home, Image, UserRound, Stethoscope, LogOut, Settings, Users, ExternalLink, Newspaper, CalendarCheck, Briefcase } from "lucide-react";
 import { clsx } from "clsx";
 import type { Role } from "@/lib/permissions";
@@ -25,7 +25,6 @@ const salesNavItems = [
 
 export default function AdminSidebar({ role }: { role: Role }) {
   const pathname = usePathname();
-  const router = useRouter();
   // UI-only convenience — the real restriction is enforced server-side
   // (proxy.ts advisory redirect + admin/layout.tsx's DB-backed session check
   // + each API route's own permission check), so this filtering can never
@@ -34,7 +33,10 @@ export default function AdminSidebar({ role }: { role: Role }) {
 
   async function handleLogout() {
     await fetch("/api/admin/auth", { method: "DELETE" });
-    router.replace("/admin/login");
+    // Hard navigation, not router.replace() — same reasoning as the login
+    // page: a client-side soft nav across the login/logged-in layout
+    // boundary can reuse a stale cached render instead of fetching fresh.
+    window.location.href = "/admin/login";
   }
 
   return (

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 export default function AdminLoginPage() {
@@ -10,7 +9,6 @@ export default function AdminLoginPage() {
   const [showPw, setShowPw] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -25,7 +23,14 @@ export default function AdminLoginPage() {
       if (res.ok) {
         const data = await res.json();
         const isSales = data.role === "sales_manager" || data.role === "sales_agent";
-        router.replace(isSales ? "/admin/crm" : "/admin");
+        // A full navigation, not router.replace(): admin/layout.tsx renders
+        // differently for the login page (no session, no sidebar) vs every
+        // other /admin page (session loaded, sidebar shown). A client-side
+        // soft navigation can reuse that already-rendered "no session" shell
+        // instead of re-fetching the layout with the now-real session,
+        // which is exactly the bug where the sidebar doesn't show up until
+        // a manual refresh. A hard navigation always fetches fresh.
+        window.location.href = isSales ? "/admin/crm" : "/admin";
       } else {
         const data = await res.json();
         setError(data.error ?? "البريد الإلكتروني أو كلمة المرور غير صحيحة");
