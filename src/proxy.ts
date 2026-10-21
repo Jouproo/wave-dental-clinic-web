@@ -18,7 +18,11 @@ export async function proxy(req: NextRequest) {
   // without auth — a browser requests these before (or regardless of)
   // login, e.g. while just viewing /admin/login or deciding whether to
   // "Add to Home Screen", and they're cosmetic, not privileged.
-  if (pathname === "/admin/login" || pathname === "/admin/icon" || pathname === "/admin/apple-icon") {
+  if (
+    pathname === "/admin/login" ||
+    pathname === "/admin/icon.png" ||
+    pathname === "/admin/apple-icon.png"
+  ) {
     return nextWithPathname(req, pathname);
   }
 
