@@ -14,8 +14,13 @@ function nextWithPathname(req: NextRequest, pathname: string) {
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Allow login page through without auth check
-  if (pathname === "/admin/login") return nextWithPathname(req, pathname);
+  // Allow the login page and the favicon/apple-touch-icon routes through
+  // without auth — a browser requests these before (or regardless of)
+  // login, e.g. while just viewing /admin/login or deciding whether to
+  // "Add to Home Screen", and they're cosmetic, not privileged.
+  if (pathname === "/admin/login" || pathname === "/admin/icon" || pathname === "/admin/apple-icon") {
+    return nextWithPathname(req, pathname);
+  }
 
   const authed = await isAdminAuthenticated(req);
   if (!authed) {

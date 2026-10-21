@@ -1,0 +1,17 @@
+{
+  "name": "Wave Dental — لوحة التحكم",
+  "short_name": "Wave Admin",
+  "description": "لوحة تحكم عيادة Wave Dental Clinic",
+  "start_url": "/admin",
+  "scope": "/admin",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f2540",
+  "theme_color": "#1672d6",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    { "src": "/admin-manifest-icon-192", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/admin-manifest-icon-512", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}

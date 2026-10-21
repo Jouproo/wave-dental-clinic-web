@@ -1,0 +1,9 @@
+import { renderWaveIcon } from "@/lib/pwa-icon";
+
+export const runtime = "edge";
+export const size = { width: 64, height: 64 };
+export const contentType = "image/png";
+
+export default function Icon() {
+  return renderWaveIcon(64);
+}
