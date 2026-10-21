@@ -4,8 +4,14 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import AdminSidebar from "./AdminSidebar";
+import type { Role } from "@/lib/permissions";
 
-export default function AdminShell({ children }: { children: React.ReactNode }) {
+interface AdminShellSession {
+  role: Role;
+  name: string;
+}
+
+export default function AdminShell({ children, session }: { children: React.ReactNode; session: AdminShellSession | null }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -17,7 +23,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
     return () => window.removeEventListener("admin-sidebar-close", handler);
   }, []);
 
-  if (pathname === "/admin/login") {
+  if (pathname === "/admin/login" || !session) {
     return <>{children}</>;
   }
 
@@ -26,7 +32,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
       {/* ── Desktop sidebar (always visible ≥ lg) ── */}
       <div className="hidden lg:block">
-        <AdminSidebar />
+        <AdminSidebar role={session.role} />
       </div>
 
       {/* ── Mobile overlay backdrop ── */}
@@ -45,7 +51,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           ${open ? "translate-x-0" : "translate-x-full"}
         `}
       >
-        <AdminSidebar />
+        <AdminSidebar role={session.role} />
       </div>
 
       {/* ── Main content ── */}

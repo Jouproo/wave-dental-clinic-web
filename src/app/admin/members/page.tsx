@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { UserPlus, Trash2, Loader2, ShieldCheck, Copy, Check } from "lucide-react";
+import { UserPlus, Trash2, Loader2, ShieldCheck, Copy, Check, Ban, CheckCircle } from "lucide-react";
 import type { DbAdminUser } from "@/types/admin";
 
 const SQL = `-- شغّل هذا الكود في Supabase SQL Editor مرة واحدة فقط
@@ -11,14 +11,24 @@ CREATE TABLE IF NOT EXISTS admin_users (
   name        TEXT        NOT NULL DEFAULT '',
   password_hash TEXT      NOT NULL,
   role        TEXT        NOT NULL DEFAULT 'admin',
+  status      TEXT        NOT NULL DEFAULT 'active',
+  allowed_branch_ids UUID[] NOT NULL DEFAULT '{}',
+  extra_permissions TEXT[] NOT NULL DEFAULT '{}',
+  manager_id  UUID        REFERENCES admin_users(id) ON DELETE SET NULL,
+  scope_override TEXT,
   created_at  TIMESTAMPTZ DEFAULT now()
-);`;
+);
+-- ثم شغّل ملف supabase/migrations/crm_schema_phase_a.sql لإضافة باقي أعمدة CRM.`;
+
+const ROLE_LABELS: Record<string, string> = {
+  admin: "أدمن", sales_manager: "مدير مبيعات", sales_agent: "مندوب مبيعات",
+};
 
 export default function MembersPage() {
   const [members, setMembers] = useState<DbAdminUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [tableError, setTableError] = useState(false);
-  const [form, setForm] = useState({ email: "", name: "", password: "" });
+  const [form, setForm] = useState({ email: "", name: "", password: "", role: "admin", manager_id: "" });
   const [adding, setAdding] = useState(false);
   const [addError, setAddError] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -52,13 +62,13 @@ export default function MembersPage() {
       const res = await fetch("/api/admin/members", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, manager_id: form.manager_id || undefined }),
       });
       if (!res.ok) {
         const d = await res.json();
         throw new Error(d.error ?? "فشل الإضافة");
       }
-      setForm({ email: "", name: "", password: "" });
+      setForm({ email: "", name: "", password: "", role: "admin", manager_id: "" });
       await load();
     } catch (err: unknown) {
       setAddError(err instanceof Error ? err.message : "حدث خطأ");
@@ -83,11 +93,27 @@ export default function MembersPage() {
     }
   }
 
+  async function updateMember(id: string, patch: Record<string, unknown>) {
+    const res = await fetch(`/api/admin/members/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(patch),
+    });
+    if (!res.ok) {
+      const d = await res.json();
+      alert(d.error ?? "فشل التعديل");
+      return;
+    }
+    await load();
+  }
+
   function handleCopy() {
     navigator.clipboard.writeText(SQL);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
+
+  const managers = members.filter((m) => m.role === "admin" || m.role === "sales_manager");
 
   if (loading) {
     return (
@@ -100,7 +126,7 @@ export default function MembersPage() {
   return (
     <div className="p-8 max-w-3xl">
       <h1 className="text-2xl font-bold text-slate-800 mb-1">المسؤولون</h1>
-      <p className="text-slate-500 mb-8">إدارة حسابات الدخول للوحة التحكم</p>
+      <p className="text-slate-500 mb-8">إدارة حسابات الدخول للوحة التحكم — الأدمن له وصول كامل، ومندوب/مدير المبيعات مقيّد بقسم CRM والحجوزات فقط</p>
 
       {/* SQL setup banner */}
       {tableError && (
@@ -136,9 +162,9 @@ export default function MembersPage() {
             ) : (
               <ul className="divide-y divide-gray-50">
                 {members.map((m) => (
-                  <li key={m.id} className="flex items-center justify-between px-6 py-4">
+                  <li key={m.id} className="flex flex-wrap items-center justify-between gap-3 px-6 py-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center">
+                      <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
                         <ShieldCheck className="w-4 h-4 text-blue-600" />
                       </div>
                       <div>
@@ -146,10 +172,35 @@ export default function MembersPage() {
                         <p className="text-slate-400 text-xs" dir="ltr">{m.email}</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <span className="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-full font-medium">
-                        {m.role}
-                      </span>
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={m.role}
+                        onChange={(e) => updateMember(m.id, { role: e.target.value })}
+                        className="text-xs bg-blue-50 text-blue-700 px-2 py-1.5 rounded-lg font-medium border-0 focus:ring-2 focus:ring-blue-300"
+                      >
+                        {Object.entries(ROLE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                      </select>
+                      {m.role !== "admin" && (
+                        <select
+                          value={m.manager_id ?? ""}
+                          onChange={(e) => updateMember(m.id, { manager_id: e.target.value || null })}
+                          className="text-xs bg-gray-50 text-gray-600 px-2 py-1.5 rounded-lg border-0 focus:ring-2 focus:ring-blue-300"
+                        >
+                          <option value="">بدون مدير</option>
+                          {managers.filter((mg) => mg.id !== m.id).map((mg) => (
+                            <option key={mg.id} value={mg.id}>{mg.name || mg.email}</option>
+                          ))}
+                        </select>
+                      )}
+                      <button
+                        onClick={() => updateMember(m.id, { status: m.status === "active" ? "disabled" : "active" })}
+                        title={m.status === "active" ? "تعطيل الحساب" : "تفعيل الحساب"}
+                        className={`p-1.5 rounded-lg transition-colors ${
+                          m.status === "active" ? "text-green-500 hover:bg-green-50" : "text-gray-400 hover:bg-gray-100"
+                        }`}
+                      >
+                        {m.status === "active" ? <CheckCircle className="w-4 h-4" /> : <Ban className="w-4 h-4" />}
+                      </button>
                       <button
                         onClick={() => handleDelete(m.id)}
                         disabled={deletingId === m.id || members.length <= 1}
@@ -200,6 +251,31 @@ export default function MembersPage() {
                     dir="ltr"
                   />
                 </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-600 mb-1.5">الدور</label>
+                  <select
+                    value={form.role}
+                    onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))}
+                    className="input"
+                  >
+                    {Object.entries(ROLE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+                  </select>
+                </div>
+                {form.role !== "admin" && (
+                  <div>
+                    <label className="block text-sm font-medium text-slate-600 mb-1.5">المدير المسؤول (اختياري)</label>
+                    <select
+                      value={form.manager_id}
+                      onChange={(e) => setForm((f) => ({ ...f, manager_id: e.target.value }))}
+                      className="input"
+                    >
+                      <option value="">بدون</option>
+                      {managers.map((mg) => <option key={mg.id} value={mg.id}>{mg.name || mg.email}</option>)}
+                    </select>
+                  </div>
+                )}
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-600 mb-1.5">

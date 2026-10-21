@@ -23,7 +23,9 @@ export default function AdminLoginPage() {
         body: JSON.stringify({ email, password }),
       });
       if (res.ok) {
-        router.replace("/admin");
+        const data = await res.json();
+        const isSales = data.role === "sales_manager" || data.role === "sales_agent";
+        router.replace(isSales ? "/admin/crm" : "/admin");
       } else {
         const data = await res.json();
         setError(data.error ?? "البريد الإلكتروني أو كلمة المرور غير صحيحة");

@@ -10,32 +10,44 @@ export async function GET() {
   const supabase = supabaseServer();
   const { data, error } = await supabase
     .from("admin_users")
-    .select("id, email, name, role, created_at")
+    .select("id, email, name, role, status, allowed_branch_ids, extra_permissions, manager_id, scope_override, created_at")
     .order("created_at", { ascending: true });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json(data ?? []);
 }
 
+const VALID_ROLES = ["admin", "sales_manager", "sales_agent"];
+
 export async function POST(req: NextRequest) {
   if (!(await requireAdmin())) {
     return NextResponse.json({ error: "غير مصرح" }, { status: 401 });
   }
 
-  const { email, name, password } = await req.json();
+  const { email, name, password, role, manager_id, allowed_branch_ids } = await req.json();
   if (!email || !name || !password) {
     return NextResponse.json({ error: "البريد الإلكتروني والاسم وكلمة المرور مطلوبة" }, { status: 400 });
   }
   if (password.length < 8) {
     return NextResponse.json({ error: "كلمة المرور يجب أن تكون 8 أحرف على الأقل" }, { status: 400 });
   }
+  if (role && !VALID_ROLES.includes(role)) {
+    return NextResponse.json({ error: "دور غير صالح" }, { status: 400 });
+  }
 
   const passwordHash = await hashPassword(password);
   const supabase = supabaseServer();
   const { data, error } = await supabase
     .from("admin_users")
-    .insert({ email: email.toLowerCase().trim(), name: name.trim(), password_hash: passwordHash })
-    .select("id, email, name, role, created_at")
+    .insert({
+      email: email.toLowerCase().trim(),
+      name: name.trim(),
+      password_hash: passwordHash,
+      role: role || "admin",
+      manager_id: manager_id || null,
+      allowed_branch_ids: Array.isArray(allowed_branch_ids) ? allowed_branch_ids : [],
+    })
+    .select("id, email, name, role, status, allowed_branch_ids, extra_permissions, manager_id, scope_override, created_at")
     .single();
 
   if (error) {

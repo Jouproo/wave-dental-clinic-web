@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
     const supabase = supabaseServer();
     const { data: users, error } = await supabase
       .from("admin_users")
-      .select("id, email, password_hash");
+      .select("id, email, password_hash, role, status");
 
     if (!error && users && users.length > 0) {
       // DB mode: require email
@@ -30,15 +30,20 @@ export async function POST(req: NextRequest) {
       if (!valid) {
         return NextResponse.json({ error: "البريد الإلكتروني أو كلمة المرور غير صحيحة" }, { status: 401 });
       }
-      const token = await createAdminToken();
+      if (user.status === "disabled") {
+        return NextResponse.json({ error: "تم تعطيل هذا الحساب. تواصل مع الإدارة." }, { status: 403 });
+      }
+      const token = await createAdminToken({ sub: user.id, email: user.email, role: user.role ?? "admin" });
       await setAdminCookie(token);
-      return NextResponse.json({ ok: true });
+      return NextResponse.json({ ok: true, role: user.role ?? "admin" });
     }
   } catch {
     // table may not exist yet — fall through to env-var fallback
   }
 
-  // Env-var fallback (legacy / first-time setup)
+  // Env-var fallback (legacy / first-time setup) — no DB user, so this
+  // session always gets the unrestricted "admin" role and no RBAC features
+  // (branch scoping, per-user permissions) apply to it.
   if (!process.env.ADMIN_PASSWORD) {
     return NextResponse.json(
       { error: "لم يتم إعداد أي حساب إداري بعد. راجع إعدادات الخادم." },
@@ -49,9 +54,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "كلمة المرور غير صحيحة" }, { status: 401 });
   }
 
-  const token = await createAdminToken();
+  const token = await createAdminToken({ sub: "", email: "", role: "admin" });
   await setAdminCookie(token);
-  return NextResponse.json({ ok: true, legacy: true });
+  return NextResponse.json({ ok: true, legacy: true, role: "admin" });
 }
 
 export async function DELETE() {

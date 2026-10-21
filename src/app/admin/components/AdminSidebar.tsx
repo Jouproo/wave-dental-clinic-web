@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Home, Image, UserRound, Stethoscope, LogOut, Settings, Users, ExternalLink, Newspaper, CalendarCheck } from "lucide-react";
+import { Home, Image, UserRound, Stethoscope, LogOut, Settings, Users, ExternalLink, Newspaper, CalendarCheck, Briefcase } from "lucide-react";
 import { clsx } from "clsx";
+import type { Role } from "@/lib/permissions";
 
-const navItems = [
+const adminNavItems = [
   { href: "/admin", label: "الرئيسية", icon: Home, exact: true },
+  { href: "/admin/crm", label: "CRM - العملاء المحتملين", icon: Briefcase, exact: false },
   { href: "/admin/bookings", label: "الحجوزات", icon: CalendarCheck, exact: false },
   { href: "/admin/hero", label: "الهيرو", icon: Image, exact: false },
   { href: "/admin/doctors", label: "الأطباء", icon: UserRound, exact: false },
@@ -16,9 +18,19 @@ const navItems = [
   { href: "/admin/members", label: "المسؤولون", icon: Users, exact: false },
 ];
 
-export default function AdminSidebar() {
+const salesNavItems = [
+  { href: "/admin/crm", label: "CRM - العملاء المحتملين", icon: Briefcase, exact: false },
+  { href: "/admin/bookings", label: "الحجوزات", icon: CalendarCheck, exact: false },
+];
+
+export default function AdminSidebar({ role }: { role: Role }) {
   const pathname = usePathname();
   const router = useRouter();
+  // UI-only convenience — the real restriction is enforced server-side
+  // (proxy.ts advisory redirect + admin/layout.tsx's DB-backed session check
+  // + each API route's own permission check), so this filtering can never
+  // be the only thing standing between a sales account and an admin-only page.
+  const navItems = role === "admin" ? adminNavItems : salesNavItems;
 
   async function handleLogout() {
     await fetch("/api/admin/auth", { method: "DELETE" });
