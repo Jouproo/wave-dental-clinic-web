@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { UserPlus, Trash2, Loader2, ShieldCheck, Copy, Check, Ban, CheckCircle } from "lucide-react";
+import { UserPlus, Trash2, Loader2, ShieldCheck, Copy, Check, Ban, CheckCircle, KeyRound, X } from "lucide-react";
 import type { DbAdminUser } from "@/types/admin";
 
 const SQL = `-- شغّل هذا الكود في Supabase SQL Editor مرة واحدة فقط
@@ -33,6 +33,10 @@ export default function MembersPage() {
   const [addError, setAddError] = useState("");
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [passwordEditId, setPasswordEditId] = useState<string | null>(null);
+  const [newPassword, setNewPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [savingPassword, setSavingPassword] = useState(false);
 
   async function load() {
     setLoading(true);
@@ -107,6 +111,42 @@ export default function MembersPage() {
     await load();
   }
 
+  function openPasswordEdit(id: string) {
+    setPasswordEditId(id);
+    setNewPassword("");
+    setPasswordError("");
+  }
+
+  function closePasswordEdit() {
+    setPasswordEditId(null);
+    setNewPassword("");
+    setPasswordError("");
+  }
+
+  async function handleChangePassword(id: string) {
+    if (newPassword.length < 8) {
+      setPasswordError("كلمة المرور يجب أن تكون 8 أحرف على الأقل");
+      return;
+    }
+    setSavingPassword(true);
+    setPasswordError("");
+    try {
+      const res = await fetch(`/api/admin/members/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password: newPassword }),
+      });
+      if (!res.ok) {
+        const d = await res.json();
+        setPasswordError(d.error ?? "فشل تغيير كلمة المرور");
+        return;
+      }
+      closePasswordEdit();
+    } finally {
+      setSavingPassword(false);
+    }
+  }
+
   function handleCopy() {
     navigator.clipboard.writeText(SQL);
     setCopied(true);
@@ -162,58 +202,103 @@ export default function MembersPage() {
             ) : (
               <ul className="divide-y divide-gray-50">
                 {members.map((m) => (
-                  <li key={m.id} className="flex flex-wrap items-center justify-between gap-3 px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
-                        <ShieldCheck className="w-4 h-4 text-blue-600" />
+                  <li key={m.id} className="px-6 py-4">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center flex-shrink-0">
+                          <ShieldCheck className="w-4 h-4 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="font-medium text-slate-800 text-sm">{m.name}</p>
+                          <p className="text-slate-400 text-xs" dir="ltr">{m.email}</p>
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium text-slate-800 text-sm">{m.name}</p>
-                        <p className="text-slate-400 text-xs" dir="ltr">{m.email}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <select
-                        value={m.role}
-                        onChange={(e) => updateMember(m.id, { role: e.target.value })}
-                        className="text-xs bg-blue-50 text-blue-700 px-2 py-1.5 rounded-lg font-medium border-0 focus:ring-2 focus:ring-blue-300"
-                      >
-                        {Object.entries(ROLE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-                      </select>
-                      {m.role !== "admin" && (
+                      <div className="flex items-center gap-2">
                         <select
-                          value={m.manager_id ?? ""}
-                          onChange={(e) => updateMember(m.id, { manager_id: e.target.value || null })}
-                          className="text-xs bg-gray-50 text-gray-600 px-2 py-1.5 rounded-lg border-0 focus:ring-2 focus:ring-blue-300"
+                          value={m.role}
+                          onChange={(e) => updateMember(m.id, { role: e.target.value })}
+                          className="text-xs bg-blue-50 text-blue-700 px-2 py-1.5 rounded-lg font-medium border-0 focus:ring-2 focus:ring-blue-300"
                         >
-                          <option value="">بدون مدير</option>
-                          {managers.filter((mg) => mg.id !== m.id).map((mg) => (
-                            <option key={mg.id} value={mg.id}>{mg.name || mg.email}</option>
-                          ))}
+                          {Object.entries(ROLE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                         </select>
-                      )}
-                      <button
-                        onClick={() => updateMember(m.id, { status: m.status === "active" ? "disabled" : "active" })}
-                        title={m.status === "active" ? "تعطيل الحساب" : "تفعيل الحساب"}
-                        className={`p-1.5 rounded-lg transition-colors ${
-                          m.status === "active" ? "text-green-500 hover:bg-green-50" : "text-gray-400 hover:bg-gray-100"
-                        }`}
-                      >
-                        {m.status === "active" ? <CheckCircle className="w-4 h-4" /> : <Ban className="w-4 h-4" />}
-                      </button>
-                      <button
-                        onClick={() => handleDelete(m.id)}
-                        disabled={deletingId === m.id || members.length <= 1}
-                        className="p-1.5 text-slate-400 hover:text-red-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors rounded-lg hover:bg-red-50"
-                        title={members.length <= 1 ? "لا يمكن حذف آخر مسؤول" : "حذف"}
-                      >
-                        {deletingId === m.id ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <Trash2 className="w-4 h-4" />
+                        {m.role !== "admin" && (
+                          <select
+                            value={m.manager_id ?? ""}
+                            onChange={(e) => updateMember(m.id, { manager_id: e.target.value || null })}
+                            className="text-xs bg-gray-50 text-gray-600 px-2 py-1.5 rounded-lg border-0 focus:ring-2 focus:ring-blue-300"
+                          >
+                            <option value="">بدون مدير</option>
+                            {managers.filter((mg) => mg.id !== m.id).map((mg) => (
+                              <option key={mg.id} value={mg.id}>{mg.name || mg.email}</option>
+                            ))}
+                          </select>
                         )}
-                      </button>
+                        <button
+                          onClick={() => (passwordEditId === m.id ? closePasswordEdit() : openPasswordEdit(m.id))}
+                          title="تغيير كلمة المرور"
+                          className={`p-1.5 rounded-lg transition-colors ${
+                            passwordEditId === m.id ? "text-blue-600 bg-blue-50" : "text-slate-400 hover:text-blue-600 hover:bg-blue-50"
+                          }`}
+                        >
+                          <KeyRound className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => updateMember(m.id, { status: m.status === "active" ? "disabled" : "active" })}
+                          title={m.status === "active" ? "تعطيل الحساب" : "تفعيل الحساب"}
+                          className={`p-1.5 rounded-lg transition-colors ${
+                            m.status === "active" ? "text-green-500 hover:bg-green-50" : "text-gray-400 hover:bg-gray-100"
+                          }`}
+                        >
+                          {m.status === "active" ? <CheckCircle className="w-4 h-4" /> : <Ban className="w-4 h-4" />}
+                        </button>
+                        <button
+                          onClick={() => handleDelete(m.id)}
+                          disabled={deletingId === m.id || members.length <= 1}
+                          className="p-1.5 text-slate-400 hover:text-red-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors rounded-lg hover:bg-red-50"
+                          title={members.length <= 1 ? "لا يمكن حذف آخر مسؤول" : "حذف"}
+                        >
+                          {deletingId === m.id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
                     </div>
+
+                    {passwordEditId === m.id && (
+                      <div className="mt-3 flex flex-wrap items-start gap-2 bg-slate-50 rounded-xl p-3" dir="rtl">
+                        <input
+                          type="password"
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          placeholder="كلمة مرور جديدة (8 أحرف على الأقل)"
+                          minLength={8}
+                          autoFocus
+                          className="input flex-1 min-w-[200px]"
+                          onKeyDown={(e) => { if (e.key === "Enter") handleChangePassword(m.id); }}
+                        />
+                        <button
+                          onClick={() => handleChangePassword(m.id)}
+                          disabled={savingPassword}
+                          className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-xs font-semibold rounded-lg"
+                        >
+                          {savingPassword ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : "حفظ"}
+                        </button>
+                        <button
+                          onClick={closePasswordEdit}
+                          className="p-2 text-slate-400 hover:text-slate-600 rounded-lg hover:bg-slate-100"
+                          title="إلغاء"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                        {passwordError && (
+                          <p className="w-full text-xs text-red-600 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                            {passwordError}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </li>
                 ))}
               </ul>
