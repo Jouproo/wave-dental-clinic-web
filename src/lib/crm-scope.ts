@@ -19,7 +19,11 @@ export type Scope =
 export async function resolveScope(session: Session, _domain: ScopeDomain): Promise<Scope> {
   if (session.role === "admin") return { kind: "all" };
 
-  const effective = session.scopeOverride ?? (session.role === "sales_manager" ? "team" : "own");
+  // A sales_manager oversees the whole sales pipeline (including unassigned
+  // leads waiting to be distributed), so they see everything by default.
+  // A sales_agent only sees leads assigned to them. scope_override can still
+  // narrow/widen either role per member.
+  const effective = session.scopeOverride ?? (session.role === "sales_manager" ? "all" : "own");
 
   if (effective === "all") return { kind: "all" };
 

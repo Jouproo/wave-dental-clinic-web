@@ -17,16 +17,8 @@ export async function GET() {
   ]);
 
   let assignableUsers: { id: string; name: string; email: string; role: string }[] = [];
-  if (session.role === "admin") {
+  if (session.role === "admin" || session.role === "sales_manager") {
     const { data } = await supabase.from("admin_users").select("id, name, email, role").eq("status", "active").order("name");
-    assignableUsers = data ?? [];
-  } else if (session.role === "sales_manager") {
-    const { data } = await supabase
-      .from("admin_users")
-      .select("id, name, email, role")
-      .eq("status", "active")
-      .or(`id.eq.${session.userId},manager_id.eq.${session.userId}`)
-      .order("name");
     assignableUsers = data ?? [];
   }
   // sales_agent gets no assignable-users list — they can't reassign leads.

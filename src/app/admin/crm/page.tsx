@@ -49,7 +49,7 @@ export default async function CrmOverviewPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-slate-800">نظرة عامة — CRM</h1>
         <p className="text-slate-500 mt-1">
-          {session.role === "admin" ? "كل العملاء المحتملين" : session.role === "sales_manager" ? "عملاء فريقك" : "عملاؤك"}
+          {session.role === "admin" || session.role === "sales_manager" ? "كل العملاء المحتملين" : "عملاؤك"}
         </p>
       </div>
 
