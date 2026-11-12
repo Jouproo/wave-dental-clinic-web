@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { supabaseServer } from "@/lib/supabase";
+import { isValidMetaEventId, sendMetaLeadEvent } from "@/lib/meta-capi";
 import type { BookingRequestType } from "@/types/admin";
 
 const MIN_FILL_MS = 2000; // reject submissions faster than a human could plausibly fill the form
@@ -94,6 +95,18 @@ export async function POST(req: NextRequest) {
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  // Meta Conversions API mirror of the browser Lead — runs after the
+  // response is sent, so it can't slow down or fail the submission.
+  if (requestType === "implant_diagnosis" && isValidMetaEventId(body.meta_event_id)) {
+    const eventId = body.meta_event_id;
+    const host = req.headers.get("host");
+    const eventSourceUrl = req.headers.get("referer") || (host ? `https://${host}/implant-diagnosis` : "");
+    const userAgent = req.headers.get("user-agent") ?? undefined;
+    const fbp = req.cookies.get("_fbp")?.value;
+    const fbc = req.cookies.get("_fbc")?.value;
+    after(() => sendMetaLeadEvent({ eventId, eventSourceUrl, clientIp: ip, userAgent, fbp, fbc }));
   }
 
   return NextResponse.json({ ok: true, id: data.id }, { status: 201 });

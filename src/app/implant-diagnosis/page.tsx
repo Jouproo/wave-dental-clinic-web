@@ -4,6 +4,7 @@ import Footer from "@/components/layout/Footer";
 import FloatingWhatsAppButton from "@/components/shared/FloatingWhatsAppButton";
 import MobileStickyBar from "@/components/shared/MobileStickyBar";
 import BookingForm from "@/components/booking/BookingForm";
+import MetaViewContent from "@/components/analytics/MetaViewContent";
 import { getClinicSettings } from "@/lib/clinic-settings";
 import { clinicConfig } from "@/config/clinic";
 import { Anchor, Sparkles, ShieldCheck, MessagesSquare, Clock } from "lucide-react";
@@ -27,6 +28,7 @@ export default async function ImplantDiagnosisPage() {
 
   return (
     <div className="min-h-screen bg-white" dir="rtl">
+      <MetaViewContent contentName="implant_diagnosis" />
       <Header settings={settings} />
 
       <main className="pb-[88px] md:pb-0">

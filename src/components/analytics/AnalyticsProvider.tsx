@@ -5,6 +5,7 @@ import { GoogleTagManager } from "@next/third-parties/google";
 import { isPublicRoute } from "@/lib/analytics";
 import AnalyticsPageView from "./AnalyticsPageView";
 import AdsConversionTracking from "./AdsConversionTracking";
+import MetaPixel from "./MetaPixel";
 
 /**
  * The only place GTM gets mounted. The project has a single root layout
@@ -16,24 +17,29 @@ export default function AnalyticsProvider() {
   const pathname = usePathname();
   const gtmId = process.env.NEXT_PUBLIC_GTM_ID;
 
-  if (!gtmId || !isPublicRoute(pathname)) return null;
+  if (!isPublicRoute(pathname)) return null;
 
   return (
     <>
-      <GoogleTagManager gtmId={gtmId} />
-      {/* Standard GTM noscript fallback — the official component only
-          injects the <script>, not this part. */}
-      <noscript>
-        <iframe
-          src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
-          height="0"
-          width="0"
-          style={{ display: "none", visibility: "hidden" }}
-          title="gtm"
-        />
-      </noscript>
-      <AnalyticsPageView />
-      <AdsConversionTracking />
+      <MetaPixel />
+      {gtmId && (
+        <>
+          <GoogleTagManager gtmId={gtmId} />
+          {/* Standard GTM noscript fallback — the official component only
+              injects the <script>, not this part. */}
+          <noscript>
+            <iframe
+              src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
+              height="0"
+              width="0"
+              style={{ display: "none", visibility: "hidden" }}
+              title="gtm"
+            />
+          </noscript>
+          <AnalyticsPageView />
+          <AdsConversionTracking />
+        </>
+      )}
     </>
   );
 }

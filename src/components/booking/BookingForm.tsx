@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trackAnalyticsEvent } from "@/lib/analytics";
+import { trackMetaEvent, newMetaEventId } from "@/lib/meta-pixel";
 
 interface ServiceOption {
   id: string;
@@ -30,6 +31,7 @@ export default function BookingForm({ mode, services = [] }: BookingFormProps) {
   const isDiagnosis = mode === "implant_diagnosis";
   const fileRef = useRef<HTMLInputElement>(null);
   const [renderedAt] = useState(() => Date.now());
+  const metaLeadSent = useRef(false); // guards against a duplicate Meta Lead
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -93,6 +95,10 @@ export default function BookingForm({ mode, services = [] }: BookingFormProps) {
       }
       setUploadLabel("");
 
+      // One ID per submission, shared by the browser Pixel and the
+      // server-side Conversions API so Meta dedupes them.
+      const metaEventId = isDiagnosis ? newMetaEventId() : undefined;
+
       const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -109,10 +115,17 @@ export default function BookingForm({ mode, services = [] }: BookingFormProps) {
           consent_given: consent,
           website,
           rendered_at: renderedAt,
+          meta_event_id: metaEventId,
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "حدث خطأ أثناء الإرسال");
+
+      // Only reached after every upload succeeded and the booking was saved.
+      if (metaEventId && !metaLeadSent.current) {
+        metaLeadSent.current = true;
+        trackMetaEvent("Lead", { content_name: "implant_diagnosis_form" }, metaEventId);
+      }
 
       trackAnalyticsEvent("booking_start", {
         cta_location: isDiagnosis ? "implant_diagnosis_form" : "booking_form",
