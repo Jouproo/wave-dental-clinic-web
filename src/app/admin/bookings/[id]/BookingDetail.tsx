@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   User, Phone, Calendar, Clock, MessageSquare, FileText, Loader2,
-  CheckCircle2, ShieldCheck, Stethoscope, Send, ArrowRight,
+  CheckCircle2, ShieldCheck, Stethoscope, Send, ArrowRight, Cigarette,
 } from "lucide-react";
 import Link from "next/link";
 import type { DbBookingRequest, DbDoctor, BookingStatus } from "@/types/admin";
@@ -114,6 +114,13 @@ export default function BookingDetail({ booking, doctors, serviceTitle, xrays }:
           {serviceTitle && <InfoRow icon={Stethoscope} label="الخدمة">{serviceTitle}</InfoRow>}
           {booking.preferred_date && <InfoRow icon={Calendar} label="التاريخ المفضل">{booking.preferred_date}</InfoRow>}
           {booking.preferred_time && <InfoRow icon={Clock} label="الوقت المفضل">{booking.preferred_time}</InfoRow>}
+          {isDiagnosis && (
+            <InfoRow icon={Cigarette} label="التدخين">
+              {booking.is_smoker === true ? (
+                <span className="text-amber-700">مدخن</span>
+              ) : booking.is_smoker === false ? "غير مدخن" : <span className="text-slate-400">لم يُجب</span>}
+            </InfoRow>
+          )}
           {isDiagnosis && (
             <InfoRow icon={ShieldCheck} label="الموافقة على المعالجة الطبية">
               {booking.consent_given ? "موافق ✓" : "غير موافق"}

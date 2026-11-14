@@ -75,26 +75,33 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "تم إرسال عدة طلبات، من فضلك حاول مرة أخرى بعد قليل" }, { status: 429 });
   }
 
-  const { data, error } = await supabase
-    .from("booking_requests")
-    .insert({
-      request_type: requestType,
-      name,
-      phone,
-      age: Number.isFinite(Number(body.age)) && body.age ? Number(body.age) : null,
-      service_id: typeof body.service_id === "string" && body.service_id ? body.service_id : null,
-      preferred_date: typeof body.preferred_date === "string" && body.preferred_date ? body.preferred_date : null,
-      preferred_time: typeof body.preferred_time === "string" ? body.preferred_time.trim() || null : null,
-      message: typeof body.message === "string" ? body.message.trim().slice(0, 2000) || null : null,
-      xray_paths: xrayPaths.slice(0, 5),
-      consent_given: Boolean(body.consent_given),
-      submitter_ip: ip,
-    })
-    .select("id")
-    .single();
+  const record: Record<string, unknown> = {
+    request_type: requestType,
+    name,
+    phone,
+    age: Number.isFinite(Number(body.age)) && body.age ? Number(body.age) : null,
+    service_id: typeof body.service_id === "string" && body.service_id ? body.service_id : null,
+    preferred_date: typeof body.preferred_date === "string" && body.preferred_date ? body.preferred_date : null,
+    preferred_time: typeof body.preferred_time === "string" ? body.preferred_time.trim() || null : null,
+    message: typeof body.message === "string" ? body.message.trim().slice(0, 2000) || null : null,
+    xray_paths: xrayPaths.slice(0, 5),
+    consent_given: Boolean(body.consent_given),
+    submitter_ip: ip,
+  };
+  // Optional "smoker?" answer — only an explicit boolean is stored; anything else = not answered.
+  if (requestType === "implant_diagnosis" && typeof body.is_smoker === "boolean") {
+    record.is_smoker = body.is_smoker;
+  }
 
-  if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+  let { data, error } = await supabase.from("booking_requests").insert(record).select("id").single();
+  if (error && /is_smoker/.test(error.message)) {
+    // Column not migrated yet — never lose a patient's submission over an optional field.
+    delete record.is_smoker;
+    ({ data, error } = await supabase.from("booking_requests").insert(record).select("id").single());
+  }
+
+  if (error || !data) {
+    return NextResponse.json({ error: error?.message ?? "فشل حفظ الطلب" }, { status: 500 });
   }
 
   // Meta Conversions API mirror of the browser Lead — runs after the

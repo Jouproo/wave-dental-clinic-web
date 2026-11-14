@@ -5,6 +5,7 @@ import Link from "next/link";
 import {
   Search, Loader2, Inbox, ChevronRight, ChevronLeft, AlertCircle, Archive, ArchiveRestore,
   UserPlus, GitBranch, Download, X, CalendarRange, FilterX, CheckSquare, ClipboardCheck,
+  SlidersHorizontal, ChevronDown,
 } from "lucide-react";
 import type { DbLead } from "@/types/admin";
 import {
@@ -96,6 +97,11 @@ export default function LeadsTable({ canArchive, canAssign, canExport, canUpdate
   const [allMatching, setAllMatching] = useState(false);
   const [dialog, setDialog] = useState<BulkDialog>(null);
   const [busy, setBusy] = useState(false);
+  // The advanced panel starts open only when the URL already carries one of its filters.
+  const [panelOpen, setPanelOpen] = useState(() => {
+    const f = filtersFromParams(initialParams);
+    return Boolean(f.stage || f.classification || f.qualification_status || f.source || f.assigned_to || f.overdue_followups || f.needs_review);
+  });
 
   const canBulk = canArchive || canAssign || canUpdate;
 
@@ -156,6 +162,31 @@ export default function LeadsTable({ canArchive, canAssign, canExport, canUpdate
   const selectionCount = allMatching ? result?.total ?? 0 : selected.size;
   const userName = useMemo(() => new Map(team.map((u) => [u.id, u.name])), [team]);
   const activeFilterCount = Object.entries(apiFilter(filters)).filter(([k]) => k !== "view").length;
+  const panelCount = [
+    filters.stage, filters.classification, filters.qualification_status, filters.source, filters.assigned_to,
+    filters.overdue_followups, filters.needs_review,
+  ].filter(Boolean).length;
+
+  /** One removable chip per active filter, so what's applied is always visible at a glance. */
+  const activeChips = useMemo(() => {
+    const chips: { key: string; label: string; value: string; clear: Partial<Filters> }[] = [];
+    const add = (key: string, label: string, value: string, clear: Partial<Filters>) => chips.push({ key, label, value, clear });
+    if (filters.q.trim()) add("q", "بحث", filters.q.trim(), { q: "" });
+    if (filters.date_from || filters.date_to) {
+      const value = filters.preset
+        ? DATE_PRESET_LABELS[filters.preset as Exclude<DatePreset, "">]
+        : `${filters.date_from || "…"} ← ${filters.date_to || "…"}`;
+      add("date", "التاريخ", value, { preset: "", date_from: "", date_to: "" });
+    }
+    if (filters.stage) add("stage", "المرحلة", STAGE_LABELS[filters.stage as keyof typeof STAGE_LABELS] ?? filters.stage, { stage: "" });
+    if (filters.classification) add("cls", "التصنيف", CLASSIFICATION_LABELS[filters.classification as keyof typeof CLASSIFICATION_LABELS] ?? filters.classification, { classification: "" });
+    if (filters.qualification_status) add("qual", "التأهيل", QUALIFICATION_LABELS[filters.qualification_status as keyof typeof QUALIFICATION_LABELS] ?? filters.qualification_status, { qualification_status: "" });
+    if (filters.source) add("source", "المصدر", filters.source, { source: "" });
+    if (filters.assigned_to) add("assignee", "المسؤول", filters.assigned_to === "__none__" ? "بدون مسؤول" : userName.get(filters.assigned_to) ?? "…", { assigned_to: "" });
+    if (filters.overdue_followups) add("overdue", "المتابعة", "متأخرة", { overdue_followups: false });
+    if (filters.needs_review) add("review", "الاستيراد", "يحتاج مراجعة", { needs_review: false });
+    return chips;
+  }, [filters, userName]);
 
   function togglePage() {
     setAllMatching(false);
@@ -225,86 +256,114 @@ export default function LeadsTable({ canArchive, canAssign, canExport, canUpdate
         ))}
       </div>
 
-      {/* Filters */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-4 space-y-3">
-        <div className="flex flex-wrap gap-3">
+      {/* Filters — one compact toolbar + an optional panel, with removable chips for whatever is active */}
+      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-3 mb-4">
+        <div className="flex flex-wrap items-center gap-2">
           <div className="relative flex-1 min-w-[220px]">
-            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
             <input
               value={filters.q}
               onChange={(e) => setFilters({ q: e.target.value })}
               placeholder="ابحث بالاسم أو الهاتف أو الكود..."
-              className="input pr-9"
+              className="input h-10 py-0 pr-9"
             />
           </div>
 
-          {/* Date range on entry date */}
-          <div className="flex flex-wrap items-center gap-2 bg-gray-50 rounded-xl px-2 py-1">
-            <CalendarRange className="w-4 h-4 text-slate-400" />
+          {/* Date range on entry date: preset + from/to in one control */}
+          <div className={`flex flex-wrap sm:flex-nowrap items-center w-full sm:w-auto max-w-full min-h-10 rounded-xl border px-2 transition-colors ${
+            filters.date_from || filters.date_to ? "border-blue-300 bg-blue-50/40" : "border-slate-200 bg-white"
+          }`}>
+            <CalendarRange className="w-4 h-4 text-slate-400 shrink-0" />
             <select
               value={filters.preset}
               onChange={(e) => applyPreset(e.target.value as DatePreset)}
-              className="input w-auto py-1.5 bg-white"
+              className="h-9 min-w-0 flex-1 sm:flex-none bg-transparent text-sm text-slate-700 pr-1.5 pl-1 focus:outline-none cursor-pointer"
               aria-label="فترة تاريخ الدخول"
             >
               <option value="">كل التواريخ</option>
               {Object.entries(DATE_PRESET_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
             </select>
-            <label className="flex items-center gap-1 text-xs text-slate-500">
-              من
-              <input type="date" value={filters.date_from} max={filters.date_to || undefined}
-                onChange={(e) => setFilters({ date_from: e.target.value, preset: "" })} className="input w-auto py-1.5 bg-white" />
-            </label>
-            <label className="flex items-center gap-1 text-xs text-slate-500">
-              إلى
-              <input type="date" value={filters.date_to} min={filters.date_from || undefined}
-                onChange={(e) => setFilters({ date_to: e.target.value, preset: "" })} className="input w-auto py-1.5 bg-white" />
-            </label>
+            {/* Phones: from/to drop to their own line under the preset; wider screens: one row with a divider */}
+            <span className="basis-full h-px bg-slate-100 sm:hidden" aria-hidden />
+            <span className="hidden sm:block w-px h-5 bg-slate-200 mx-1" aria-hidden />
+            <input
+              type="date" value={filters.date_from} max={filters.date_to || undefined} aria-label="من تاريخ"
+              onChange={(e) => setFilters({ date_from: e.target.value, preset: "" })}
+              className="h-9 min-w-0 flex-1 sm:flex-none sm:w-[8.5rem] bg-transparent text-sm text-slate-700 px-1 focus:outline-none"
+            />
+            <span className="text-slate-400 text-xs px-0.5" aria-hidden>←</span>
+            <input
+              type="date" value={filters.date_to} min={filters.date_from || undefined} aria-label="إلى تاريخ"
+              onChange={(e) => setFilters({ date_to: e.target.value, preset: "" })}
+              className="h-9 min-w-0 flex-1 sm:flex-none sm:w-[8.5rem] bg-transparent text-sm text-slate-700 px-1 focus:outline-none"
+            />
           </div>
-        </div>
 
-        <div className="flex flex-wrap gap-2">
-          <select value={filters.stage} onChange={(e) => setFilters({ stage: e.target.value })} className="input w-auto min-w-[130px] py-1.5">
-            <option value="">كل المراحل</option>
-            {Object.entries(STAGE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-          </select>
-          <select value={filters.classification} onChange={(e) => setFilters({ classification: e.target.value })} className="input w-auto min-w-[110px] py-1.5">
-            <option value="">كل التصنيفات</option>
-            {Object.entries(CLASSIFICATION_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-          </select>
-          <select value={filters.qualification_status} onChange={(e) => setFilters({ qualification_status: e.target.value })} className="input w-auto min-w-[140px] py-1.5">
-            <option value="">كل حالات التأهيل</option>
-            {Object.entries(QUALIFICATION_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-          </select>
-          <select value={filters.source} onChange={(e) => setFilters({ source: e.target.value })} className="input w-auto min-w-[120px] py-1.5">
-            <option value="">كل المصادر</option>
-            {SOURCE_OPTIONS.map((s) => <option key={s} value={s}>{s}</option>)}
-          </select>
-          {team.length > 0 && (
-            <select value={filters.assigned_to} onChange={(e) => setFilters({ assigned_to: e.target.value })} className="input w-auto min-w-[130px] py-1.5">
-              <option value="">كل المسؤولين</option>
-              <option value="__none__">بدون مسؤول</option>
-              {team.map((u) => <option key={u.id} value={u.id}>{u.name}</option>)}
-            </select>
-          )}
-          <select value={filters.sort} onChange={(e) => setFilters({ sort: e.target.value })} className="input w-auto min-w-[130px] py-1.5" aria-label="الترتيب">
+          <select value={filters.sort} onChange={(e) => setFilters({ sort: e.target.value })} className="input h-10 py-0 flex-1 sm:flex-none sm:w-auto" aria-label="الترتيب">
             <option value="">الأحدث أولاً</option>
             <option value="entry_asc">الأقدم أولاً</option>
             <option value="score_desc">الأعلى Score</option>
             <option value="followup_asc">أقرب متابعة</option>
           </select>
-          <ToggleChip on={filters.overdue_followups} onClick={() => setFilters({ overdue_followups: !filters.overdue_followups })} icon={AlertCircle} color="amber">
-            متابعات متأخرة
-          </ToggleChip>
-          <ToggleChip on={filters.needs_review} onClick={() => setFilters({ needs_review: !filters.needs_review })} icon={ClipboardCheck} color="purple">
-            يحتاج مراجعة
-          </ToggleChip>
-          {activeFilterCount > 0 && (
-            <button onClick={() => setFilters({ ...EMPTY_FILTERS, view: filters.view })} className="flex items-center gap-1 px-3 py-1.5 text-xs text-slate-500 hover:text-red-600">
-              <FilterX className="w-4 h-4" /> مسح الفلاتر
-            </button>
-          )}
+
+          <button
+            onClick={() => setPanelOpen((o) => !o)}
+            aria-expanded={panelOpen}
+            className={`flex flex-1 sm:flex-none justify-center items-center gap-2 h-10 px-3.5 rounded-xl border text-sm font-semibold transition-colors ${
+              panelOpen || panelCount > 0 ? "border-blue-300 bg-blue-50 text-blue-700" : "border-slate-200 text-slate-600 hover:bg-slate-50"
+            }`}
+          >
+            <SlidersHorizontal className="w-4 h-4" />
+            فلاتر
+            {panelCount > 0 && (
+              <span className="min-w-5 h-5 px-1 rounded-full bg-blue-600 text-white text-[11px] leading-5 text-center">{panelCount}</span>
+            )}
+            <ChevronDown className={`w-4 h-4 transition-transform ${panelOpen ? "rotate-180" : ""}`} />
+          </button>
         </div>
+
+        {panelOpen && (
+          <div className="mt-3 pt-3 border-t border-slate-100">
+            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2">
+              <FilterSelect label="المرحلة" value={filters.stage} onChange={(v) => setFilters({ stage: v })}
+                options={Object.entries(STAGE_LABELS)} />
+              <FilterSelect label="التصنيف" value={filters.classification} onChange={(v) => setFilters({ classification: v })}
+                options={Object.entries(CLASSIFICATION_LABELS)} />
+              <FilterSelect label="التأهيل" value={filters.qualification_status} onChange={(v) => setFilters({ qualification_status: v })}
+                options={Object.entries(QUALIFICATION_LABELS)} />
+              <FilterSelect label="المصدر" value={filters.source} onChange={(v) => setFilters({ source: v })}
+                options={SOURCE_OPTIONS.map((s) => [s, s] as [string, string])} />
+              {team.length > 0 && (
+                <FilterSelect label="المسؤول" value={filters.assigned_to} onChange={(v) => setFilters({ assigned_to: v })}
+                  options={[["__none__", "بدون مسؤول"], ...team.map((u) => [u.id, u.name] as [string, string])]} />
+              )}
+            </div>
+            <div className="flex flex-wrap gap-2 mt-2">
+              <ToggleChip on={filters.overdue_followups} onClick={() => setFilters({ overdue_followups: !filters.overdue_followups })} icon={AlertCircle} color="amber">
+                متابعات متأخرة
+              </ToggleChip>
+              <ToggleChip on={filters.needs_review} onClick={() => setFilters({ needs_review: !filters.needs_review })} icon={ClipboardCheck} color="purple">
+                يحتاج مراجعة
+              </ToggleChip>
+            </div>
+          </div>
+        )}
+
+        {activeChips.length > 0 && (
+          <div className="flex flex-wrap items-center gap-1.5 mt-3">
+            {activeChips.map((c) => (
+              <span key={c.key} className="inline-flex items-center gap-1 h-7 pr-2.5 pl-1 rounded-full bg-slate-100 text-xs text-slate-700">
+                <span className="text-slate-400">{c.label}:</span> {c.value}
+                <button onClick={() => setFilters(c.clear)} className="p-0.5 rounded-full hover:bg-slate-200 text-slate-500" aria-label={`إزالة فلتر ${c.label}`}>
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </span>
+            ))}
+            <button onClick={() => setFilters({ ...EMPTY_FILTERS, view: filters.view })} className="flex items-center gap-1 h-7 px-2 text-xs text-slate-500 hover:text-red-600">
+              <FilterX className="w-3.5 h-3.5" /> مسح الكل
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Result bar */}
@@ -484,12 +543,28 @@ export default function LeadsTable({ canArchive, canAssign, canExport, canUpdate
 
 // ---------- small pieces ----------
 
+function FilterSelect({ label, value, onChange, options }: {
+  label: string; value: string; onChange: (v: string) => void; options: [string, string][];
+}) {
+  return (
+    <select
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      aria-label={label}
+      className={`input h-9 py-0 min-w-0 text-[13px] ${value ? "border-blue-300 bg-blue-50/40 text-blue-800 font-medium" : "text-slate-600"}`}
+    >
+      <option value="">{label}: الكل</option>
+      {options.map(([k, v]) => <option key={k} value={k}>{label}: {v}</option>)}
+    </select>
+  );
+}
+
 function ToggleChip({ on, onClick, icon: Icon, color, children }: {
   on: boolean; onClick: () => void; icon: React.ElementType; color: "amber" | "purple"; children: React.ReactNode;
 }) {
   const onCls = color === "amber" ? "bg-amber-100 text-amber-700" : "bg-purple-100 text-purple-700";
   return (
-    <button onClick={onClick} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-colors ${on ? onCls : "bg-gray-50 text-gray-500 hover:bg-gray-100"}`}>
+    <button onClick={onClick} className={`flex items-center gap-1.5 h-8 px-3 rounded-xl text-xs font-semibold transition-colors ${on ? onCls : "bg-gray-50 text-gray-500 hover:bg-gray-100"}`}>
       <Icon className="w-4 h-4" /> {children}
     </button>
   );

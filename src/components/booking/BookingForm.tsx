@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Upload, X, FileText, Loader2, CheckCircle2, AlertCircle,
-  User, Phone, Calendar, Clock, MessageSquare, ShieldCheck,
+  User, Phone, Calendar, Clock, MessageSquare, ShieldCheck, Cigarette,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { trackAnalyticsEvent } from "@/lib/analytics";
@@ -36,6 +36,7 @@ export default function BookingForm({ mode, services = [] }: BookingFormProps) {
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [age, setAge] = useState("");
+  const [isSmoker, setIsSmoker] = useState<boolean | null>(null); // null = not answered (optional)
   const [serviceId, setServiceId] = useState("");
   const [preferredDate, setPreferredDate] = useState("");
   const [preferredTime, setPreferredTime] = useState("");
@@ -107,6 +108,7 @@ export default function BookingForm({ mode, services = [] }: BookingFormProps) {
           name: name.trim(),
           phone: phone.trim(),
           age: isDiagnosis && age ? Number(age) : undefined,
+          is_smoker: isDiagnosis && isSmoker !== null ? isSmoker : undefined,
           service_id: !isDiagnosis && serviceId ? serviceId : undefined,
           preferred_date: !isDiagnosis ? preferredDate : undefined,
           preferred_time: !isDiagnosis ? preferredTime : undefined,
@@ -214,13 +216,38 @@ export default function BookingForm({ mode, services = [] }: BookingFormProps) {
               placeholder="مثال: 35"
             />
           </FormField>
+          <FormField label="هل أنت مدخن؟ (اختياري)" icon={Cigarette}>
+            <div role="radiogroup" aria-label="هل أنت مدخن؟" className="grid grid-cols-2 gap-2">
+              {([[true, "نعم، مدخن"], [false, "لا، غير مدخن"]] as const).map(([value, label]) => {
+                const selected = isSmoker === value;
+                return (
+                  <button
+                    key={label}
+                    type="button"
+                    role="radio"
+                    aria-checked={selected}
+                    // Tapping the selected option again clears it — the question is optional.
+                    onClick={() => setIsSmoker(selected ? null : value)}
+                    className={cn(
+                      "rounded-xl border px-3 py-2.5 text-sm font-semibold transition-colors",
+                      selected
+                        ? "border-brand-500 bg-brand-50 text-brand-700"
+                        : "border-slate-200 bg-white text-ink-600 hover:border-brand-300"
+                    )}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </FormField>
           <FormField label="وصف الحالة" icon={MessageSquare}>
             <textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={4}
               className="booking-input resize-none"
-              placeholder="اكتب أي تفاصيل تساعد الطبيب: الأسنان المفقودة، مدة الفقد، أمراض مزمنة (سكر، ضغط)، تدخين، إلخ."
+              placeholder="اكتب أي تفاصيل تساعد الطبيب: الأسنان المفقودة، مدة الفقد، أمراض مزمنة (سكر، ضغط)، إلخ."
             />
           </FormField>
         </>

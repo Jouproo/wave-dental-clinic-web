@@ -172,6 +172,7 @@ export interface DbBookingRequest {
   message: string | null;
   xray_paths: string[];
   consent_given: boolean;
+  is_smoker?: boolean | null;
   status: BookingStatus;
   diagnosis_notes: string | null;
   diagnosed_by: string | null;
