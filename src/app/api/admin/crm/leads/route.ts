@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession, sessionHasPermission } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase";
 import { resolveScope, applyScope } from "@/lib/crm-scope";
-import { deriveLeadComputedFields } from "@/lib/crm-leads";
+import { deriveLeadComputedFields, parseLeadFilter, applyLeadFilter } from "@/lib/crm-leads";
 
 const PAGE_SIZE_DEFAULT = 25;
 const PAGE_SIZE_MAX = 100;
@@ -16,45 +16,24 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const page = Math.max(1, Number(searchParams.get("page")) || 1);
   const pageSize = Math.min(PAGE_SIZE_MAX, Math.max(1, Number(searchParams.get("pageSize")) || PAGE_SIZE_DEFAULT));
-  const search = searchParams.get("q")?.trim();
+  const filter = parseLeadFilter(searchParams);
 
   const supabase = supabaseServer();
   const scope = await resolveScope(session, "crm");
 
-  let query = applyScope(
-    supabase.from("leads").select("*", { count: "exact" }).is("archived_at", null),
-    scope
+  let query = applyLeadFilter(
+    applyScope(supabase.from("leads").select("*", { count: "exact" }), scope),
+    filter
   );
-
-  for (const [param, column] of [
-    ["stage", "stage"], ["classification", "classification"],
-    ["qualification_status", "qualification_status"], ["assigned_to", "assigned_to"],
-    ["branch_id", "branch_id"], ["source", "source"], ["service_interest", "service_interest"],
-  ] as const) {
-    const val = searchParams.get(param);
-    if (val) query = query.eq(column, val);
-  }
-
-  if (searchParams.get("overdue_followups") === "1") {
-    query = query.lt("next_follow_up_at", new Date().toISOString());
-  }
-  if (searchParams.get("no_followup") === "1") {
-    query = query.is("next_follow_up_at", null);
-  }
-  if (searchParams.get("unassigned") === "1") {
-    query = query.is("assigned_to", null);
-  }
-
-  if (search) {
-    const escaped = search.replace(/[%_]/g, "");
-    query = query.or(
-      `name.ilike.%${escaped}%,mobile_raw.ilike.%${escaped}%,mobile_normalized.ilike.%${escaped}%,lead_code.ilike.%${escaped}%`
-    );
-  }
 
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
-  query = query.order("created_at", { ascending: false }).range(from, to);
+  const sort = searchParams.get("sort");
+  if (sort === "entry_asc") query = query.order("entry_date", { ascending: true }).order("created_at", { ascending: true });
+  else if (sort === "score_desc") query = query.order("lead_score", { ascending: false }).order("entry_date", { ascending: false });
+  else if (sort === "followup_asc") query = query.order("next_follow_up_at", { ascending: true, nullsFirst: false });
+  else query = query.order("entry_date", { ascending: false }).order("created_at", { ascending: false });
+  query = query.range(from, to);
 
   const { data, error, count } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

@@ -5,12 +5,17 @@ import { Plus, FileSpreadsheet } from "lucide-react";
 import { getSession, sessionHasPermission } from "@/lib/auth";
 import LeadsTable from "./LeadsTable";
 
-export default async function LeadsPage() {
+export default async function LeadsPage({ searchParams }: { searchParams: Promise<Record<string, string | string[] | undefined>> }) {
   const session = await getSession();
-  const canImport = session ? sessionHasPermission(session, "crm.import") : false;
+  const can = (p: Parameters<typeof sessionHasPermission>[1]) => (session ? sessionHasPermission(session, p) : false);
+  const canImport = can("crm.import");
+  const raw = await searchParams;
+  const initialParams = Object.fromEntries(
+    Object.entries(raw).filter((e): e is [string, string] => typeof e[1] === "string")
+  );
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-8">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">العملاء المحتملون</h1>
@@ -36,7 +41,13 @@ export default async function LeadsPage() {
         </div>
       </div>
 
-      <LeadsTable />
+      <LeadsTable
+        canArchive={can("crm.archive")}
+        canAssign={can("crm.assign")}
+        canExport={can("crm.export")}
+        canUpdate={can("crm.update")}
+        initialParams={initialParams}
+      />
     </div>
   );
 }

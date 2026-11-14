@@ -39,6 +39,12 @@ export function normalizeEgyptianPhone(raw: string | null | undefined): Normaliz
   if (digits.startsWith("+20")) digits = "0" + digits.slice(3);
   else if (digits.startsWith("0020")) digits = "0" + digits.slice(4);
   else if (digits.startsWith("20") && digits.length === 12) digits = "0" + digits.slice(2);
+  // "+20 (0)10…" style — the trunk zero written after the country code.
+  if (digits.startsWith("001") && digits.length === 12) digits = digits.slice(1);
+  // Excel stores phone cells as numbers and drops the leading zero
+  // (01012345678 → 1012345678). A 10-digit 1[0125]XXXXXXXX can only be
+  // that — restoring the zero isn't a guess.
+  if (/^1[0125]\d{8}$/.test(digits)) digits = "0" + digits;
 
   if (!EG_MOBILE_LOCAL.test(digits)) {
     // Leave ambiguous/invalid numbers for manual review instead of guessing a fix.

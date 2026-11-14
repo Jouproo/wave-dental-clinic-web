@@ -118,6 +118,8 @@ export interface DbLead {
   created_at: string;
   updated_at: string;
   archived_at: string | null;
+  archived_by?: string | null;
+  archive_reason?: string | null;
   import_batch_id: string | null;
   needs_review: boolean;
   review_notes: string | null;

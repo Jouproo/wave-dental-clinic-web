@@ -53,7 +53,18 @@ export const STAGE_COLORS: Record<LeadStage, string> = {
 };
 
 export const SOURCE_OPTIONS = [
-  "Instant Form - زراعة سبتمبر", "ماسنجر", "واتساب", "إنستجرام", "ترشيح", "زيارة مباشرة", "الموقع", "أخرى",
+  "Instant Form - زراعة سبتمبر", "فيسبوك", "ماسنجر", "واتساب", "إنستجرام", "تيك توك", "جوجل", "ترشيح", "زيارة مباشرة", "الموقع", "أخرى",
+];
+
+/** Why a lead was moved to the archive. Archiving is reversible; the reason keeps the archive explainable. */
+export const ARCHIVE_REASON_OPTIONS = [
+  "ليد قديم — انتهت صلاحيته",
+  "لم يرد بعد عدة محاولات",
+  "رقم خطأ / غير صالح",
+  "مكرر",
+  "غير مهتم",
+  "تم التعامل معه خارج النظام",
+  "أخرى",
 ];
 
 export const SERVICE_INTEREST_OPTIONS = [
@@ -76,4 +87,51 @@ export function followUpUrgency(nextFollowUpAt: string | null): "overdue" | "tod
   if (due < startOfToday) return "overdue";
   if (due < startOfTomorrow) return "today";
   return "upcoming";
+}
+
+/** YYYY-MM-DD in the clinic's local calendar (not UTC — toISOString() would shift Egyptian late-night dates). */
+export function toYmd(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+export type DatePreset =
+  | "" | "today" | "last7" | "last30" | "this_month" | "last_month" | "older30" | "older60" | "older90";
+
+export const DATE_PRESET_LABELS: Record<Exclude<DatePreset, "">, string> = {
+  today: "النهارده",
+  last7: "آخر 7 أيام",
+  last30: "آخر 30 يوم",
+  this_month: "الشهر الحالي",
+  last_month: "الشهر اللي فات",
+  older30: "أقدم من 30 يوم",
+  older60: "أقدم من 60 يوم",
+  older90: "أقدم من 90 يوم",
+};
+
+/** Resolves a quick preset to an inclusive entry_date range. */
+export function datePresetRange(preset: DatePreset, now: Date = new Date()): { from: string; to: string } {
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const daysAgo = (n: number) => toYmd(new Date(today.getTime() - n * 86400000));
+  switch (preset) {
+    case "today": return { from: toYmd(today), to: toYmd(today) };
+    case "last7": return { from: daysAgo(6), to: toYmd(today) };
+    case "last30": return { from: daysAgo(29), to: toYmd(today) };
+    case "this_month": return { from: toYmd(new Date(today.getFullYear(), today.getMonth(), 1)), to: toYmd(today) };
+    case "last_month": return {
+      from: toYmd(new Date(today.getFullYear(), today.getMonth() - 1, 1)),
+      to: toYmd(new Date(today.getFullYear(), today.getMonth(), 0)),
+    };
+    case "older30": return { from: "", to: daysAgo(31) };
+    case "older60": return { from: "", to: daysAgo(61) };
+    case "older90": return { from: "", to: daysAgo(91) };
+    default: return { from: "", to: "" };
+  }
+}
+
+/** Whole days since the lead entered the funnel. */
+export function leadAgeDays(entryDate: string, now: Date = new Date()): number {
+  const [y, m, d] = entryDate.split("-").map(Number);
+  const entry = new Date(y, m - 1, d);
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.max(0, Math.round((today.getTime() - entry.getTime()) / 86400000));
 }

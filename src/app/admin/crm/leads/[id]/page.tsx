@@ -26,6 +26,7 @@ export default async function LeadDetailPage({ params }: { params: Promise<{ id:
     <LeadDetail
       lead={lead}
       canAssign={sessionHasPermission(session, "crm.assign")}
+      canArchive={sessionHasPermission(session, "crm.archive")}
       branches={branchesRes.data ?? []}
       assignableUsers={usersRes.data ?? []}
     />

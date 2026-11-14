@@ -4,21 +4,21 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Phone, MessageCircle, User, Flame, Loader2, CheckCircle2, ArrowRight,
-  Calendar, Briefcase, MapPin, FileText,
+  Calendar, Briefcase, MapPin, FileText, Archive, ArchiveRestore, ClipboardCheck,
 } from "lucide-react";
 import type { DbLead } from "@/types/admin";
 import {
   STAGE_LABELS, CLASSIFICATION_LABELS, CLASSIFICATION_COLORS, QUALIFICATION_LABELS,
-  PIPELINE_STAGES, SIDE_TRACK_STAGES, LOSS_REASON_OPTIONS,
+  PIPELINE_STAGES, SIDE_TRACK_STAGES, LOSS_REASON_OPTIONS, ARCHIVE_REASON_OPTIONS, leadAgeDays,
 } from "@/lib/crm-labels";
 
 interface Branch { id: string; name: string }
 interface AssignableUser { id: string; name: string; email: string }
 
 export default function LeadDetail({
-  lead, canAssign, branches, assignableUsers,
+  lead, canAssign, canArchive, branches, assignableUsers,
 }: {
-  lead: DbLead; canAssign: boolean; branches: Branch[]; assignableUsers: AssignableUser[];
+  lead: DbLead; canAssign: boolean; canArchive: boolean; branches: Branch[]; assignableUsers: AssignableUser[];
 }) {
   const router = useRouter();
   const [stage, setStage] = useState(lead.stage);
@@ -30,6 +30,8 @@ export default function LeadDetail({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
+  const [archiveReason, setArchiveReason] = useState(ARCHIVE_REASON_OPTIONS[0]);
+  const [archiveOther, setArchiveOther] = useState("");
 
   const branchName = branches.find((b) => b.id === lead.branch_id)?.name;
 
@@ -72,9 +74,33 @@ export default function LeadDetail({
 
   return (
     <div className="p-8 max-w-4xl">
-      <button onClick={() => router.push("/admin/crm/leads")} className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-blue-600 mb-5">
+      <button onClick={() => (window.history.length > 1 ? router.back() : router.push("/admin/crm/leads"))} className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-blue-600 mb-5">
         <ArrowRight className="w-4 h-4" /> رجوع لكل العملاء
       </button>
+
+      {lead.archived_at && (
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-3 bg-slate-100 border border-slate-200 rounded-2xl px-5 py-3">
+          <div className="flex items-center gap-2 text-sm text-slate-700">
+            <Archive className="w-4 h-4" />
+            <span>
+              العميل ده في <b>الأرشيف</b> من {new Date(lead.archived_at).toLocaleDateString("ar-EG")}
+              {lead.archive_reason ? ` — ${lead.archive_reason}` : ""}
+            </span>
+          </div>
+          {canArchive && (
+            <button onClick={() => save({ archive: false })} disabled={saving}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-300 rounded-xl text-sm font-semibold text-slate-700 hover:bg-slate-50">
+              <ArchiveRestore className="w-4 h-4" /> استرجاع للعملاء النشطين
+            </button>
+          )}
+        </div>
+      )}
+      {lead.needs_review && lead.review_notes && (
+        <div className="mb-5 flex items-start gap-2 bg-purple-50 border border-purple-200 rounded-2xl px-5 py-3 text-sm text-purple-800">
+          <ClipboardCheck className="w-4 h-4 mt-0.5 flex-shrink-0" />
+          <span><b>يحتاج مراجعة من الاستيراد:</b> {lead.review_notes}</span>
+        </div>
+      )}
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Left: main info */}
@@ -83,7 +109,10 @@ export default function LeadDetail({
             <div className="flex items-start justify-between mb-4">
               <div>
                 <h1 className="text-xl font-bold text-slate-800">{lead.name}</h1>
-                <p className="text-xs text-slate-400 mt-0.5">{lead.lead_code}{lead.legacy_id ? ` · ${lead.legacy_id}` : ""}</p>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  {lead.lead_code}{lead.legacy_id ? ` · ${lead.legacy_id}` : ""}
+                  {" · "}دخل {new Date(lead.entry_date + "T00:00:00").toLocaleDateString("ar-EG")} (من {leadAgeDays(lead.entry_date)} يوم)
+                </p>
               </div>
               <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold ${CLASSIFICATION_COLORS[lead.classification]}`}>
                 <Flame className="w-3.5 h-3.5" /> {CLASSIFICATION_LABELS[lead.classification]} · {lead.lead_score}
@@ -211,6 +240,26 @@ export default function LeadDetail({
               حفظ موعد المتابعة
             </button>
           </div>
+
+          {canArchive && !lead.archived_at && (
+            <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+              <p className="text-sm font-semibold text-slate-600 mb-1">أرشفة</p>
+              <p className="text-xs text-slate-400 mb-3">يختفي من القائمة النشطة، وتقدر ترجّعه في أي وقت.</p>
+              <select value={archiveReason} onChange={(e) => setArchiveReason(e.target.value)} className="input mb-2">
+                {ARCHIVE_REASON_OPTIONS.map((r) => <option key={r} value={r}>{r}</option>)}
+              </select>
+              {archiveReason === "أخرى" && (
+                <input value={archiveOther} onChange={(e) => setArchiveOther(e.target.value)} placeholder="اكتب السبب" className="input mb-2" />
+              )}
+              <button
+                onClick={() => save({ archive: true, archive_reason: archiveReason === "أخرى" ? `أخرى: ${archiveOther.trim()}` : archiveReason })}
+                disabled={saving || (archiveReason === "أخرى" && !archiveOther.trim())}
+                className="w-full flex items-center justify-center gap-2 py-2 bg-slate-700 hover:bg-slate-800 disabled:opacity-50 text-white rounded-xl text-sm font-semibold"
+              >
+                <Archive className="w-4 h-4" /> أرشفة العميل
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

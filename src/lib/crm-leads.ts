@@ -72,3 +72,127 @@ export async function deriveLeadComputedFields(fields: LeadScoringFields) {
     qualification_status,
   };
 }
+
+// ============================================================
+// Shared lead filtering — the list endpoint, CSV export and bulk actions
+// all go through these two functions, so "the leads matching this filter"
+// means exactly the same rows everywhere (what you see is what you archive).
+// ============================================================
+
+export type LeadView = "active" | "archived" | "all";
+
+export interface LeadFilter {
+  view: LeadView;
+  q?: string;
+  stage?: string;
+  classification?: string;
+  qualification_status?: string;
+  assigned_to?: string;
+  branch_id?: string;
+  source?: string;
+  service_interest?: string;
+  unassigned?: boolean;
+  overdue_followups?: boolean;
+  no_followup?: boolean;
+  needs_review?: boolean;
+  date_from?: string; // YYYY-MM-DD inclusive, on entry_date
+  date_to?: string;   // YYYY-MM-DD inclusive, on entry_date
+}
+
+const YMD = /^\d{4}-\d{2}-\d{2}$/;
+const STRING_FILTER_KEYS = [
+  "q", "stage", "classification", "qualification_status", "assigned_to",
+  "branch_id", "source", "service_interest",
+] as const;
+const FLAG_FILTER_KEYS = ["unassigned", "overdue_followups", "no_followup", "needs_review"] as const;
+
+/** Builds a LeadFilter from URL params or a JSON body, dropping anything malformed. */
+export function parseLeadFilter(input: URLSearchParams | Record<string, unknown> | null | undefined): LeadFilter {
+  const get = (k: string): unknown =>
+    !input ? undefined : input instanceof URLSearchParams ? input.get(k) ?? undefined : input[k];
+
+  const viewRaw = get("view");
+  const filter: LeadFilter = {
+    view: viewRaw === "archived" || viewRaw === "all" ? viewRaw : "active",
+  };
+  for (const k of STRING_FILTER_KEYS) {
+    const v = get(k);
+    if (typeof v === "string" && v.trim()) filter[k] = v.trim();
+  }
+  for (const k of FLAG_FILTER_KEYS) {
+    const v = get(k);
+    if (v === true || v === "1" || v === "true") filter[k] = true;
+  }
+  const from = get("date_from");
+  const to = get("date_to");
+  if (typeof from === "string" && YMD.test(from)) filter.date_from = from;
+  if (typeof to === "string" && YMD.test(to)) filter.date_to = to;
+  return filter;
+}
+
+/* eslint-disable @typescript-eslint/no-explicit-any -- Supabase's filter-builder generics don't survive being threaded through a helper; this stays server-internal. */
+export function applyLeadFilter(query: any, filter: LeadFilter): any {
+  let q = query;
+  if (filter.view === "active") q = q.is("archived_at", null);
+  else if (filter.view === "archived") q = q.not("archived_at", "is", null);
+
+  for (const col of ["stage", "classification", "qualification_status", "assigned_to", "branch_id", "source", "service_interest"] as const) {
+    const v = filter[col];
+    if (v) q = q.eq(col, v);
+  }
+  if (filter.unassigned) q = q.is("assigned_to", null);
+  if (filter.overdue_followups) q = q.lt("next_follow_up_at", new Date().toISOString());
+  if (filter.no_followup) q = q.is("next_follow_up_at", null);
+  if (filter.needs_review) q = q.eq("needs_review", true);
+  if (filter.date_from) q = q.gte("entry_date", filter.date_from);
+  if (filter.date_to) q = q.lte("entry_date", filter.date_to);
+
+  if (filter.q) {
+    // Strip characters that would break out of PostgREST's or() grammar.
+    const escaped = filter.q.replace(/[%_,()*\\]/g, "");
+    if (escaped) {
+      q = q.or(
+        `name.ilike.%${escaped}%,mobile_raw.ilike.%${escaped}%,mobile_normalized.ilike.%${escaped}%,lead_code.ilike.%${escaped}%,legacy_id.ilike.%${escaped}%`
+      );
+    }
+  }
+  return q;
+}
+
+/**
+ * Every lead id matching a filter within the session's scope. PostgREST caps
+ * a response at 1000 rows, so this pages through. Hard-capped so a runaway
+ * bulk action can't touch an unbounded number of rows.
+ */
+export async function collectLeadIds(session: Session, filter: LeadFilter, cap = 10000): Promise<string[]> {
+  const supabase = supabaseServer();
+  const scope = await resolveScope(session, "crm");
+  const ids: string[] = [];
+  const PAGE = 1000;
+  for (let from = 0; from < cap; from += PAGE) {
+    const base: any = applyScope(supabase.from("leads").select("id"), scope);
+    const { data, error } = await applyLeadFilter(base, filter)
+      .order("id", { ascending: true })
+      .range(from, Math.min(from + PAGE, cap) - 1);
+    if (error) throw new Error(error.message);
+    ids.push(...(data ?? []).map((r: { id: string }) => r.id));
+    if (!data || data.length < PAGE) break;
+  }
+  return ids;
+}
+
+/** Keeps only the ids this session is allowed to touch (an agent can't bulk-archive someone else's lead by id). */
+export async function filterIdsToScope(session: Session, ids: string[]): Promise<string[]> {
+  const supabase = supabaseServer();
+  const scope = await resolveScope(session, "crm");
+  const allowed: string[] = [];
+  for (let i = 0; i < ids.length; i += 150) {
+    const chunk = ids.slice(i, i + 150);
+    const base: any = applyScope(supabase.from("leads").select("id").in("id", chunk), scope);
+    const { data, error } = await base;
+    if (error) throw new Error(error.message);
+    allowed.push(...(data ?? []).map((r: { id: string }) => r.id));
+  }
+  return allowed;
+}
+/* eslint-enable @typescript-eslint/no-explicit-any */

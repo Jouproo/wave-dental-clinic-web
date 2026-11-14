@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getSession, sessionHasPermission } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase";
 import { getLeadForSession, deriveLeadComputedFields } from "@/lib/crm-leads";
+import { ARCHIVE_REASON_OPTIONS } from "@/lib/crm-labels";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
@@ -85,12 +86,38 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
     stageChanged = true;
   }
 
-  const { data, error } = await supabase
+  // Archive / restore — reversible, reason required, crm.archive only.
+  if ("archive" in body) {
+    if (!sessionHasPermission(session, "crm.archive")) {
+      return NextResponse.json({ error: "لا تملك صلاحية الأرشفة" }, { status: 403 });
+    }
+    if (body.archive) {
+      const reason = typeof body.archive_reason === "string" ? body.archive_reason.trim() : "";
+      if (!ARCHIVE_REASON_OPTIONS.includes(reason) && !reason.startsWith("أخرى: ")) {
+        return NextResponse.json({ error: "اختر سبب الأرشفة" }, { status: 400 });
+      }
+      update.archived_at = new Date().toISOString();
+      update.archived_by = session.userId || null;
+      update.archive_reason = reason;
+    } else {
+      update.archived_at = null;
+      update.archived_by = null;
+      update.archive_reason = null;
+    }
+  }
+
+  let { data, error } = await supabase
     .from("leads")
     .update(update)
     .eq("id", id)
     .select()
     .single();
+  if (error && /archive_reason|archived_by/.test(error.message)) {
+    // Archive migration not run yet — still archive, just without the metadata.
+    delete update.archived_by;
+    delete update.archive_reason;
+    ({ data, error } = await supabase.from("leads").update(update).eq("id", id).select().single());
+  }
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
