@@ -12,7 +12,7 @@ import type { LeadStage } from "@/types/admin";
 
 type ImportField = string;
 
-interface ColumnInfo { index: number; header: string; samples: string[]; field: ImportField }
+interface ColumnInfo { index: number; header: string; samples: string[]; field: ImportField; detectedBy?: "header" | "content" }
 
 interface PreviewRow {
   rowNumber: number;
@@ -322,6 +322,9 @@ export default function ImportClient() {
                           >
                             {Object.entries(preview.fieldLabels).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
                           </select>
+                          {c.detectedBy === "content" && field === c.field && (
+                            <p className="text-[11px] text-blue-600 mt-0.5">✨ اتعرف عليه من البيانات اللي جوه العمود</p>
+                          )}
                           {clash && <p className="text-[11px] text-amber-600 mt-0.5">الحقل ده مربوط بأكتر من عمود — هيتاخد أول قيمة مش فاضية</p>}
                         </td>
                       </tr>

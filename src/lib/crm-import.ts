@@ -48,7 +48,7 @@ export const IMPORT_FIELDS: FieldDef[] = [
   { key: "source", label: "المصدر", aliases: ["المصدر", "مصدر", "مصدر العميل", "القناه", "المنصه", "source", "lead source", "channel", "platform"] },
   { key: "campaign", label: "الحملة / الإعلان", aliases: ["الحمله", "حمله", "اسم الحمله", "الاعلان", "اسم الاعلان", "الفورم", "campaign", "campaign name", "ad name", "adset name", "ad set name", "form name", "form", "utm campaign"] },
   { key: "service", label: "الخدمة", aliases: ["الخدمه", "خدمه", "الخدمه المطلوبه", "نوع الخدمه", "العلاج", "نوع العلاج", "المطلوب", "الاهتمام", "service", "services", "treatment", "interest", "interested in", "procedure"] },
-  { key: "case_size", label: "حجم الحالة", aliases: ["حجم الحاله", "عدد الاسنان", "case size", "number of teeth", "teeth"] },
+  { key: "case_size", label: "حجم الحالة", aliases: ["حجم الحاله", "عدد الاسنان", "عدد الزرعات", "عدد الزراعات", "الاسنان المفقوده", "عدد الاسنان المفقوده", "case size", "number of teeth", "teeth", "implants needed", "number of implants", "implants", "missing teeth", "teeth count"] },
   { key: "start_timing", label: "موعد البدء", aliases: ["موعد البدء", "موعد البدايه", "امتي تحب تبدا", "امتى تبدا", "التوقيت", "start timing", "when to start", "start date", "timing"] },
   { key: "branch", label: "الفرع", aliases: ["الفرع", "فرع", "branch", "location", "clinic"] },
   { key: "gender", label: "النوع", aliases: ["النوع", "الجنس", "gender", "sex"] },
@@ -57,7 +57,7 @@ export const IMPORT_FIELDS: FieldDef[] = [
   { key: "opened_messenger", label: "فتح ماسنجر", aliases: ["فتح ماسنجر", "opened messenger", "messenger opened"] },
   { key: "conversation_summary", label: "ملخص المحادثة", aliases: ["ملخص المحادثه", "المحادثه", "ملخص", "تفاصيل", "تفاصيل الحاله", "conversation", "conversation summary", "summary", "details", "message", "رساله", "الرساله"] },
   { key: "contact_attempts", label: "عدد المحاولات", aliases: ["عدد المحاولات", "المحاولات", "attempts", "contact attempts", "calls"] },
-  { key: "expected_value", label: "القيمة المتوقعة", aliases: ["القيمه المتوقعه (ج)", "القيمه المتوقعه", "القيمه", "المبلغ", "expected value", "deal value", "value", "amount"] },
+  { key: "expected_value", label: "القيمة المتوقعة", aliases: ["القيمه المتوقعه (ج)", "القيمه المتوقعه", "القيمه", "المبلغ", "الميزانيه", "expected value", "deal value", "value", "amount", "budget"] },
   { key: "loss_reason", label: "سبب الخسارة", aliases: ["سبب الخساره", "سبب الرفض", "loss reason", "lost reason"] },
   { key: "stage", label: "المرحلة", aliases: ["المرحله", "مرحله", "حاله العميل", "الحاله", "stage", "status", "lead status", "pipeline stage"] },
   { key: "assignee", label: "المسؤول", aliases: ["المسؤول", "مسؤول", "الموظف", "السيلز", "المندوب", "assigned to", "assignee", "owner", "agent", "sales rep"] },
@@ -71,7 +71,7 @@ export const IMPORT_FIELDS: FieldDef[] = [
 ];
 
 /** Columns the clinic's own sheet computes with formulas — recomputed server-side, never imported. */
-const IGNORED_HEADERS = ["score", "التصنيف", "مؤهل", "مؤهل؟", "classification", "الاولويه", "lead score", "qualified"];
+const IGNORED_HEADERS = ["score", "التصنيف", "مؤهل", "مؤهل؟", "classification", "الاولويه", "lead score", "qualified", "priority", "lead priority", "temperature", "حراره العميل"];
 
 export const IMPORT_FIELD_LABELS: Record<ImportField, string> = Object.fromEntries([
   ["skip", "— تجاهل —"],
@@ -426,7 +426,14 @@ export interface ParsedLeadRow {
   duplicateOfRow: number | null;
 }
 
-export interface ColumnInfo { index: number; header: string; samples: string[]; field: ImportField }
+export interface ColumnInfo {
+  index: number;
+  header: string;
+  samples: string[];
+  field: ImportField;
+  /** "content" = mapped because of the values inside the column, not its header — shown as a hint in the UI. */
+  detectedBy?: "header" | "content";
+}
 
 export interface ParseResult {
   sheetName: string;
@@ -458,6 +465,7 @@ export function parseLeadsWorkbook(wb: XLSX.WorkBook, ctx: ImportContext, opts: 
   const headers: (string | null)[] = Array.from({ length: width }, (_, i) => cellToString(headerRow[i]));
   const userMapped = Boolean(opts.mapping && Object.keys(opts.mapping).length);
   const mapping: ColumnMapping = userMapped ? opts.mapping! : autoMapColumns(headers);
+  const contentDetected = new Set<number>();
 
   // Content-based detection: a column that is mostly links is a chat-link
   // column whatever its header says (e.g. a "واتساب" column holding wa.me links),
@@ -477,9 +485,72 @@ export function parseLeadsWorkbook(wb: XLSX.WorkBook, ctx: ImportContext, opts: 
       for (const [kind, n] of Object.entries(kinds)) {
         const field: ImportField = kind === "whatsapp" ? "whatsapp_chat_url" : "meta_chat_url";
         if (filled > 0 && n / filled >= 0.5 && (mapping[i] === field || !taken.has(field))) {
+          if (mapping[i] !== field) contentDetected.add(i);
           mapping[i] = field;
           taken.add(field);
         }
+      }
+    }
+
+    // Sanity check on header matches for phone fields: "Phone Verified" contains
+    // "phone" but holds yes/no — a phone column must actually hold numbers.
+    for (let i = 0; i < headers.length; i++) {
+      if (!["mobile", "whatsapp", "alt_phone"].includes(mapping[i] ?? "")) continue;
+      const vals: string[] = [];
+      for (let r = headerRowIndex + 1; r < grid.length && vals.length < 30; r++) {
+        const v = grid[r]?.[i];
+        const str = typeof v === "number" ? String(Math.round(v)) : cellToString(v);
+        if (str) vals.push(str);
+      }
+      const phoneLike = vals.filter((v) => (asciiDigits(v).match(/\d/g) ?? []).length >= 7).length;
+      if (vals.length >= 2 && phoneLike / vals.length < 0.5) {
+        taken.delete(mapping[i]);
+        mapping[i] = "skip";
+      }
+    }
+
+    // Categorical columns recognised by their values: a column full of
+    // "سن واحد / أكتر من سن / فك كامل" is the case size whatever it's called.
+    // Only fills columns the header pass left unmapped, only fields nobody
+    // has claimed yet, and only when most values are short and match.
+    const branchKeys = ctx.branches.flatMap((b) => [normKey(b.name), normKey(b.slug)]).filter(Boolean);
+    const exactIn = (opts: string[]) => { const set = new Set(opts.map(normKey)); return (v: string) => set.has(normKey(v)); };
+    const detectors: { field: ImportField; test: (v: string) => boolean }[] = [
+      { field: "case_size", test: (v) => matchRules(v, CASE_SIZE_OPTIONS, CASE_SIZE_RULES) !== null },
+      { field: "start_timing", test: (v) => matchRules(v, START_TIMING_OPTIONS, START_TIMING_RULES) !== null },
+      { field: "service", test: (v) => matchRules(v, SERVICE_INTEREST_OPTIONS, SERVICE_RULES) !== null },
+      { field: "stage", test: (v) => normKey(v) in STAGE_BY_KEY },
+      { field: "loss_reason", test: exactIn(LOSS_REASON_OPTIONS) },
+      { field: "gender", test: (v) => /^(ذكر|انثي|male|female|m|f|راجل|ست|سيده)$/.test(normKey(v)) },
+      { field: "branch", test: (v) => { const k = normKey(v); return branchKeys.some((b) => k === b || (k.length >= 3 && (k.includes(b) || b.includes(k)))); } },
+      { field: "source", test: (v) => matchRules(v, SOURCE_OPTIONS, SOURCE_RULES) !== null },
+      // Only written dates ("12/09/2026", "2026-09-12T…") — a bare number could be money or a count.
+      { field: "entry_date", test: (v) => /\d[-/.]\d/.test(v) && parseDateCell(v) !== null },
+    ];
+    for (let i = 0; i < headers.length; i++) {
+      if ((mapping[i] ?? "skip") !== "skip") continue;
+      if (headers[i] && IGNORED_SET.has(normKey(headers[i]))) continue;
+      const values: unknown[] = [];
+      for (let r = headerRowIndex + 1; r < grid.length && values.length < 40; r++) {
+        const raw = grid[r]?.[i];
+        if (cellToString(raw)) values.push(raw);
+      }
+      if (values.length < 2) continue;
+      // Free text (notes, summaries) is long; categorical values are short. Dates may be numeric serials.
+      const shortValues = values.filter((v) => typeof v === "number" || String(v).trim().length <= 30);
+      if (shortValues.length / values.length < 0.8) continue;
+      let best: { field: ImportField; ratio: number } | null = null;
+      for (const d of detectors) {
+        if (taken.has(d.field)) continue;
+        // Text values only, and never bare digits ("2", "3" are counts, not "أكتر من سن").
+        const hits = values.filter((v) => typeof v === "string" && !/^\s*\d+\s*$/.test(v) && d.test(v)).length;
+        const ratio = hits / values.length;
+        if (ratio >= 0.6 && (!best || ratio > best.ratio)) best = { field: d.field, ratio };
+      }
+      if (best) {
+        mapping[i] = best.field;
+        taken.add(best.field);
+        contentDetected.add(i);
       }
     }
   }
@@ -490,7 +561,11 @@ export function parseLeadsWorkbook(wb: XLSX.WorkBook, ctx: ImportContext, opts: 
       const s = links.get(`${r},${i}`) ?? cellToString(grid[r]?.[i]);
       if (s) samples.push(s.length > 40 ? s.slice(0, 40) + "…" : s);
     }
-    return { index: i, header: h ?? `عمود ${XLSX.utils.encode_col(i)}`, samples, field: mapping[i] ?? "skip" };
+    const field = mapping[i] ?? "skip";
+    return {
+      index: i, header: h ?? `عمود ${XLSX.utils.encode_col(i)}`, samples, field,
+      detectedBy: field === "skip" ? undefined : contentDetected.has(i) ? ("content" as const) : ("header" as const),
+    };
   }).filter((c) => headers[c.index] || c.samples.length > 0);
 
   const colsFor = (f: ImportField) => columns.filter((c) => c.field === f).map((c) => c.index);
