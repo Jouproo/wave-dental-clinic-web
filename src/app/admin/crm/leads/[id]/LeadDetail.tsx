@@ -9,10 +9,12 @@ import {
 } from "lucide-react";
 import type { DbLead } from "@/types/admin";
 import {
-  STAGE_LABELS, CLASSIFICATION_LABELS, CLASSIFICATION_COLORS, QUALIFICATION_LABELS,
-  PIPELINE_STAGES, SIDE_TRACK_STAGES, LOSS_REASON_OPTIONS, ARCHIVE_REASON_OPTIONS, leadAgeDays,
+  CLASSIFICATION_LABELS, CLASSIFICATION_COLORS, QUALIFICATION_LABELS,
+  PIPELINE_STAGES, SIDE_TRACK_STAGES, LOSS_REASON_OPTIONS, leadAgeDays,
 } from "@/lib/crm-labels";
 import ChatLinks from "./ChatLinks";
+import { stageLabel } from "@/lib/crm-config";
+import { useCrmConfig } from "../../components/CrmConfigProvider";
 
 interface Branch { id: string; name: string }
 interface AssignableUser { id: string; name: string; email: string }
@@ -23,6 +25,7 @@ export default function LeadDetail({
   lead: DbLead; canAssign: boolean; canArchive: boolean; branches: Branch[]; assignableUsers: AssignableUser[];
 }) {
   const router = useRouter();
+  const cfg = useCrmConfig();
   const [stage, setStage] = useState(lead.stage);
   const [assignedTo, setAssignedTo] = useState(lead.assigned_to ?? "");
   const [notes, setNotes] = useState(lead.notes ?? "");
@@ -32,7 +35,7 @@ export default function LeadDetail({
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
-  const [archiveReason, setArchiveReason] = useState(ARCHIVE_REASON_OPTIONS[0]);
+  const [archiveReason, setArchiveReason] = useState(cfg.archive_reasons[0] ?? "");
   const [archiveOther, setArchiveOther] = useState("");
 
   const branchName = branches.find((b) => b.id === lead.branch_id)?.name;
@@ -77,7 +80,7 @@ export default function LeadDetail({
     : null;
 
   return (
-    <div className="p-8 max-w-4xl">
+    <div className="max-w-6xl">
       <button onClick={() => (window.history.length > 1 ? router.back() : router.push("/admin/crm/leads"))} className="flex items-center gap-1.5 text-sm text-slate-500 hover:text-blue-600 mb-5">
         <ArrowRight className="w-4 h-4" /> رجوع لكل العملاء
       </button>
@@ -105,6 +108,28 @@ export default function LeadDetail({
           <span><b>يحتاج مراجعة من الاستيراد:</b> {lead.review_notes}</span>
         </div>
       )}
+
+      <ol className="mb-5 flex gap-1.5 overflow-x-auto no-scrollbar" aria-label="مسار العميل">
+        {PIPELINE_STAGES.map((s, i) => {
+          const cur = PIPELINE_STAGES.indexOf(stage);
+          const state = i < cur ? "done" : i === cur ? "now" : "next";
+          return (
+            <li key={s} aria-current={state === "now" ? "step" : undefined}
+              className={`shrink-0 flex items-center gap-2 rounded-xl border px-3 py-2 text-xs font-bold ${
+                state === "now" ? "border-brand-950 bg-brand-950 text-white"
+                : state === "done" ? "border-brand-200 bg-brand-50 text-brand-800"
+                : "border-slate-200 bg-white text-slate-400"}`}>
+              <span className={`grid h-5 w-5 place-items-center rounded-full text-[11px] ${state === "now" ? "bg-white text-brand-950" : state === "done" ? "bg-brand-600 text-white" : "bg-slate-100"}`}>
+                {state === "done" ? "✓" : i + 1}
+              </span>
+              {stageLabel(cfg, s)}
+            </li>
+          );
+        })}
+        {!PIPELINE_STAGES.includes(stage) && (
+          <li className={`shrink-0 tn tn-${cfg.stages[stage]?.color ?? "slate"} self-center`}>{stageLabel(cfg, stage)}</li>
+        )}
+      </ol>
 
       <div className="grid lg:grid-cols-3 gap-6">
         {/* Left: main info */}
@@ -216,10 +241,10 @@ export default function LeadDetail({
             <p className="text-sm font-semibold text-slate-600 mb-3">المرحلة</p>
             <select value={stage} onChange={(e) => handleStageChange(e.target.value)} className="input mb-2">
               <optgroup label="مسار البيع">
-                {PIPELINE_STAGES.map((s) => <option key={s} value={s}>{STAGE_LABELS[s]}</option>)}
+                {PIPELINE_STAGES.map((s) => <option key={s} value={s}>{stageLabel(cfg, s)}</option>)}
               </optgroup>
               <optgroup label="حالات أخرى">
-                {SIDE_TRACK_STAGES.map((s) => <option key={s} value={s}>{STAGE_LABELS[s]}</option>)}
+                {SIDE_TRACK_STAGES.map((s) => <option key={s} value={s}>{stageLabel(cfg, s)}</option>)}
               </optgroup>
             </select>
 
@@ -275,7 +300,7 @@ export default function LeadDetail({
               <p className="text-sm font-semibold text-slate-600 mb-1">أرشفة</p>
               <p className="text-xs text-slate-400 mb-3">يختفي من القائمة النشطة، وتقدر ترجّعه في أي وقت.</p>
               <select value={archiveReason} onChange={(e) => setArchiveReason(e.target.value)} className="input mb-2">
-                {ARCHIVE_REASON_OPTIONS.map((r) => <option key={r} value={r}>{r}</option>)}
+                {cfg.archive_reasons.map((r) => <option key={r} value={r}>{r}</option>)}
               </select>
               {archiveReason === "أخرى" && (
                 <input value={archiveOther} onChange={(e) => setArchiveOther(e.target.value)} placeholder="اكتب السبب" className="input mb-2" />

@@ -9,11 +9,13 @@ import {
 } from "lucide-react";
 import type { DbLead } from "@/types/admin";
 import {
-  STAGE_LABELS, CLASSIFICATION_LABELS, CLASSIFICATION_COLORS, QUALIFICATION_LABELS, STAGE_COLORS,
-  SOURCE_OPTIONS, ARCHIVE_REASON_OPTIONS, LOSS_REASON_OPTIONS, DATE_PRESET_LABELS,
+  CLASSIFICATION_LABELS, CLASSIFICATION_COLORS, QUALIFICATION_LABELS,
+  LOSS_REASON_OPTIONS, DATE_PRESET_LABELS,
   followUpUrgency, datePresetRange, leadAgeDays, type DatePreset,
 } from "@/lib/crm-labels";
 import { sanitizeChatUrl } from "@/lib/chat-links";
+import { stageLabel } from "@/lib/crm-config";
+import { useCrmConfig } from "../components/CrmConfigProvider";
 
 const PAGE_SIZE = 25;
 
@@ -85,6 +87,7 @@ function apiFilter(f: Filters): Record<string, string> {
 type BulkDialog = null | "archive" | "assign" | "stage";
 
 export default function LeadsTable({ canArchive, canAssign, canExport, canUpdate, initialParams }: LeadsTableProps) {
+  const cfg = useCrmConfig();
   const [filters, setFiltersRaw] = useState<Filters>(() => filtersFromParams(initialParams));
   const [page, setPage] = useState(1);
   const [result, setResult] = useState<LeadsResponse | null>(null);
@@ -179,7 +182,7 @@ export default function LeadsTable({ canArchive, canAssign, canExport, canUpdate
         : `${filters.date_from || "…"} ← ${filters.date_to || "…"}`;
       add("date", "التاريخ", value, { preset: "", date_from: "", date_to: "" });
     }
-    if (filters.stage) add("stage", "المرحلة", STAGE_LABELS[filters.stage as keyof typeof STAGE_LABELS] ?? filters.stage, { stage: "" });
+    if (filters.stage) add("stage", "المرحلة", stageLabel(cfg, filters.stage), { stage: "" });
     if (filters.classification) add("cls", "التصنيف", CLASSIFICATION_LABELS[filters.classification as keyof typeof CLASSIFICATION_LABELS] ?? filters.classification, { classification: "" });
     if (filters.qualification_status) add("qual", "التأهيل", QUALIFICATION_LABELS[filters.qualification_status as keyof typeof QUALIFICATION_LABELS] ?? filters.qualification_status, { qualification_status: "" });
     if (filters.source) add("source", "المصدر", filters.source, { source: "" });
@@ -187,7 +190,7 @@ export default function LeadsTable({ canArchive, canAssign, canExport, canUpdate
     if (filters.overdue_followups) add("overdue", "المتابعة", "متأخرة", { overdue_followups: false });
     if (filters.needs_review) add("review", "الاستيراد", "يحتاج مراجعة", { needs_review: false });
     return chips;
-  }, [filters, userName]);
+  }, [filters, userName, cfg]);
 
   function togglePage() {
     setAllMatching(false);
@@ -327,13 +330,13 @@ export default function LeadsTable({ canArchive, canAssign, canExport, canUpdate
           <div className="mt-3 pt-3 border-t border-slate-100">
             <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2">
               <FilterSelect label="المرحلة" value={filters.stage} onChange={(v) => setFilters({ stage: v })}
-                options={Object.entries(STAGE_LABELS)} />
+                options={Object.entries(cfg.stages).map(([k, v]) => [k, v.label] as [string, string])} />
               <FilterSelect label="التصنيف" value={filters.classification} onChange={(v) => setFilters({ classification: v })}
                 options={Object.entries(CLASSIFICATION_LABELS)} />
               <FilterSelect label="التأهيل" value={filters.qualification_status} onChange={(v) => setFilters({ qualification_status: v })}
                 options={Object.entries(QUALIFICATION_LABELS)} />
               <FilterSelect label="المصدر" value={filters.source} onChange={(v) => setFilters({ source: v })}
-                options={SOURCE_OPTIONS.map((s) => [s, s] as [string, string])} />
+                options={cfg.sources.map((s) => [s, s] as [string, string])} />
               {team.length > 0 && (
                 <FilterSelect label="المسؤول" value={filters.assigned_to} onChange={(v) => setFilters({ assigned_to: v })}
                   options={[["__none__", "بدون مسؤول"], ...team.map((u) => [u.id, u.name] as [string, string])]} />
@@ -478,8 +481,8 @@ export default function LeadsTable({ canArchive, canAssign, canExport, canUpdate
                         </span>
                       </td>
                       <td className="px-3 py-3">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${STAGE_COLORS[lead.stage]}`}>
-                          {STAGE_LABELS[lead.stage]}
+                        <span className={`tn tn-${cfg.stages[lead.stage]?.color ?? "slate"}`}>
+                          {stageLabel(cfg, lead.stage)}
                         </span>
                       </td>
                       {team.length > 0 && (
@@ -613,7 +616,8 @@ function Dialog({ title, onClose, children }: { title: string; onClose: () => vo
 }
 
 function ArchiveDialog({ count, busy, onClose, onConfirm }: { count: number; busy: boolean; onClose: () => void; onConfirm: (reason: string, other: string) => void }) {
-  const [reason, setReason] = useState(ARCHIVE_REASON_OPTIONS[0]);
+  const cfg = useCrmConfig();
+  const [reason, setReason] = useState(cfg.archive_reasons[0] ?? "");
   const [other, setOther] = useState("");
   return (
     <Dialog title={`أرشفة ${count} عميل`} onClose={onClose}>
@@ -623,7 +627,7 @@ function ArchiveDialog({ count, busy, onClose, onConfirm }: { count: number; bus
       </p>
       <label className="block text-sm font-semibold text-slate-600 mb-1.5">سبب الأرشفة</label>
       <select value={reason} onChange={(e) => setReason(e.target.value)} className="input mb-3">
-        {ARCHIVE_REASON_OPTIONS.map((r) => <option key={r} value={r}>{r}</option>)}
+        {cfg.archive_reasons.map((r) => <option key={r} value={r}>{r}</option>)}
       </select>
       {reason === "أخرى" && <input value={other} onChange={(e) => setOther(e.target.value)} placeholder="اكتب السبب" className="input mb-3" />}
       <div className="flex gap-2 justify-end mt-2">
@@ -669,6 +673,7 @@ function AssignDialog({ count, team, busy, onClose, onConfirm }: { count: number
 function StageDialog({ count, busy, onClose, onConfirm }: {
   count: number; busy: boolean; onClose: () => void; onConfirm: (stage: string, lossReason?: string, lossOther?: string) => void;
 }) {
+  const cfg = useCrmConfig();
   const [stage, setStage] = useState("contacted");
   const [loss, setLoss] = useState("");
   const [lossOther, setLossOther] = useState("");
@@ -676,7 +681,7 @@ function StageDialog({ count, busy, onClose, onConfirm }: {
   return (
     <Dialog title={`تغيير مرحلة ${count} عميل`} onClose={onClose}>
       <select value={stage} onChange={(e) => setStage(e.target.value)} className="input mb-3">
-        {Object.entries(STAGE_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
+        {Object.entries(cfg.stages).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
       </select>
       {stage === "lost" && (
         <>

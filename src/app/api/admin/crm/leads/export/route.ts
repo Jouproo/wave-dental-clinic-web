@@ -4,7 +4,9 @@ import { supabaseServer } from "@/lib/supabase";
 import { resolveScope, applyScope } from "@/lib/crm-scope";
 import { parseLeadFilter, applyLeadFilter } from "@/lib/crm-leads";
 import { rowsToCsv } from "@/lib/csv-export";
-import { STAGE_LABELS, QUALIFICATION_LABELS } from "@/lib/crm-labels";
+import { QUALIFICATION_LABELS } from "@/lib/crm-labels";
+import { stageLabel } from "@/lib/crm-config";
+import { getCrmConfig } from "@/lib/crm-stats";
 import type { DbLead } from "@/types/admin";
 
 const MAX_ROWS = 20000;
@@ -31,9 +33,10 @@ export async function GET(req: NextRequest) {
     if (!data || data.length < 1000) break;
   }
 
-  const [{ data: users }, { data: branches }] = await Promise.all([
+  const [{ data: users }, { data: branches }, { config }] = await Promise.all([
     supabase.from("admin_users").select("id, name"),
     supabase.from("branches").select("id, name"),
+    getCrmConfig(),
   ]);
   const userName = new Map((users ?? []).map((u: { id: string; name: string }) => [u.id, u.name]));
   const branchName = new Map((branches ?? []).map((b: { id: string; name: string }) => [b.id, b.name]));
@@ -47,7 +50,7 @@ export async function GET(req: NextRequest) {
     l.lead_code, l.legacy_id, l.entry_date, l.name, l.mobile_normalized ?? l.mobile_raw, l.alt_phone,
     l.source, l.campaign_raw, l.service_interest, l.case_size, l.start_timing,
     l.branch_id ? branchName.get(l.branch_id) : "", l.classification, l.lead_score,
-    QUALIFICATION_LABELS[l.qualification_status], STAGE_LABELS[l.stage],
+    QUALIFICATION_LABELS[l.qualification_status], stageLabel(config, l.stage),
     l.assigned_to ? userName.get(l.assigned_to) : "", l.contact_attempts,
     l.next_follow_up_at?.slice(0, 16).replace("T", " "), l.loss_reason, l.notes,
     l.archived_at ? l.archived_at.slice(0, 10) : "", l.archive_reason,

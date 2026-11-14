@@ -7,7 +7,9 @@ import {
   Columns3, Settings2, Eye, X,
 } from "lucide-react";
 import { rowsToCsv } from "@/lib/csv-export";
-import { SOURCE_OPTIONS, CLASSIFICATION_COLORS, STAGE_LABELS } from "@/lib/crm-labels";
+import { CLASSIFICATION_COLORS } from "@/lib/crm-labels";
+import { stageLabel } from "@/lib/crm-config";
+import { useCrmConfig } from "../components/CrmConfigProvider";
 import type { LeadStage } from "@/types/admin";
 
 type ImportField = string;
@@ -74,6 +76,7 @@ interface TeamUser { id: string; name: string; email: string; role: string }
 type RowFilter = "all" | "new" | "duplicate" | "review";
 
 export default function ImportClient() {
+  const cfg = useCrmConfig();
   const fileRef = useRef<HTMLInputElement>(null);
   const [file, setFile] = useState<File | null>(null);
   const [dragOver, setDragOver] = useState(false);
@@ -209,7 +212,7 @@ export default function ImportClient() {
     : 0;
 
   return (
-    <div className="p-4 sm:p-8 max-w-6xl">
+    <div className="max-w-6xl">
       <h1 className="text-2xl font-bold text-slate-800 mb-1">استيراد عملاء من إكسل</h1>
       <p className="text-slate-500 mb-6 text-sm leading-relaxed">
         ارفع أي ملف Excel أو CSV فيه عملاء: شيت Wave CRM، أو تصدير Leads من فيسبوك/إنستجرام، أو أي شيت معمول يدوي.
@@ -393,7 +396,7 @@ export default function ImportClient() {
               <div>
                 <label className="block font-semibold text-slate-600 mb-1.5">المصدر الافتراضي (للصفوف اللي مفيهاش مصدر)</label>
                 <input list="source-options" value={defaultSource} onChange={(e) => setDefaultSource(e.target.value)} placeholder="مثلاً: فيسبوك" className="input" />
-                <datalist id="source-options">{SOURCE_OPTIONS.map((s) => <option key={s} value={s} />)}</datalist>
+                <datalist id="source-options">{cfg.sources.map((s) => <option key={s} value={s} />)}</datalist>
               </div>
 
               <div>
@@ -472,7 +475,7 @@ export default function ImportClient() {
                         <td className="px-3 py-2 text-slate-500 text-xs whitespace-nowrap" dir="ltr">{r.entry_date ?? "—"}</td>
                         <td className="px-3 py-2 font-medium text-slate-800">
                           {r.name}
-                          {r.stage !== "new" && <span className="block text-[11px] text-slate-400">{STAGE_LABELS[r.stage]}</span>}
+                          {r.stage !== "new" && <span className="block text-[11px] text-slate-400">{stageLabel(cfg, r.stage)}</span>}
                         </td>
                         <td className={`px-3 py-2 text-xs ${r.mobile_valid ? "text-slate-600" : "text-red-500"}`} dir="ltr">{r.mobile_raw || "—"}</td>
                         <td className="px-3 py-2 text-slate-500 text-xs">{r.source ?? "—"}</td>

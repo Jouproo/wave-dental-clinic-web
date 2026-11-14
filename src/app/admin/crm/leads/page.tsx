@@ -15,28 +15,20 @@ export default async function LeadsPage({ searchParams }: { searchParams: Promis
   );
 
   return (
-    <div className="p-4 sm:p-8">
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+    <div>
+      <div className="crm-head mb-5">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">العملاء المحتملون</h1>
-          <p className="text-slate-500 mt-1">متابعة الليدز من أول تواصل لحد بدء العلاج</p>
+          <h1>العملاء</h1>
+          <p>متابعة العملاء المحتملين من أول تواصل لحد بدء العلاج</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex gap-2">
           {canImport && (
-            <Link
-              href="/admin/crm/import"
-              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 font-semibold rounded-xl transition-colors text-sm"
-            >
-              <FileSpreadsheet className="w-4 h-4" />
-              استيراد من إكسل
+            <Link href="/admin/crm/import" className="crm-btn crm-btn-outline">
+              <FileSpreadsheet className="w-4 h-4" /> استيراد
             </Link>
           )}
-          <Link
-            href="/admin/crm/leads/new"
-            className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors text-sm"
-          >
-            <Plus className="w-4 h-4" />
-            إضافة عميل محتمل
+          <Link href="/admin/crm/leads/new" className="crm-btn crm-btn-blue">
+            <Plus className="w-4 h-4" /> عميل
           </Link>
         </div>
       </div>

@@ -40,7 +40,7 @@ export default function AdminShell({ children, session }: { children: React.Reac
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex" dir="rtl">
+    <div className="min-h-screen bg-[#f4f7fb] flex" dir="rtl">
 
       {/* ── Desktop sidebar (always visible ≥ lg) ── */}
       <div className="hidden lg:block">

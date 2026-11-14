@@ -108,7 +108,7 @@ export default function InstallAppButton({ variant = "sidebar" }: { variant?: "s
         <Download className="w-4 h-4" /> ثبت التطبيق على موبايلك
       </button>
     ) : (
-      <button onClick={install} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors w-full">
+      <button onClick={install} className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-white bg-white/10 hover:bg-white/15 transition-colors w-full">
         <Download className="w-4 h-4 flex-shrink-0" />
         ثبت التطبيق
       </button>

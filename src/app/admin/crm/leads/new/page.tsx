@@ -1,15 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useCrmConfig } from "../../components/CrmConfigProvider";
 import { useRouter } from "next/navigation";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import {
-  SOURCE_OPTIONS, SERVICE_INTEREST_OPTIONS, CASE_SIZE_OPTIONS, START_TIMING_OPTIONS,
+  SERVICE_INTEREST_OPTIONS, CASE_SIZE_OPTIONS, START_TIMING_OPTIONS,
 } from "@/lib/crm-labels";
 
 interface Branch { id: string; name: string }
 
 export default function NewLeadPage() {
+  const cfg = useCrmConfig();
   const router = useRouter();
   const [branches, setBranches] = useState<Branch[]>([]);
   const [form, setForm] = useState({
@@ -52,7 +54,7 @@ export default function NewLeadPage() {
   }
 
   return (
-    <div className="p-8 max-w-2xl">
+    <div className="max-w-2xl">
       <h1 className="text-2xl font-bold text-slate-800 mb-1">إضافة عميل محتمل</h1>
       <p className="text-slate-500 mb-6">الاسم مطلوب فقط — باقي البيانات اختيارية ويمكن إكمالها لاحقًا</p>
 
@@ -70,7 +72,7 @@ export default function NewLeadPage() {
           <Field label="المصدر">
             <select value={form.source} onChange={(e) => field("source", e.target.value)} className="input">
               <option value="">اختر...</option>
-              {SOURCE_OPTIONS.map((o) => <option key={o} value={o}>{o}</option>)}
+              {cfg.sources.map((o) => <option key={o} value={o}>{o}</option>)}
             </select>
           </Field>
           <Field label="الخدمة">
