@@ -5,7 +5,7 @@ import Link from "next/link";
 import {
   Search, Loader2, Inbox, ChevronRight, ChevronLeft, AlertCircle, Archive, ArchiveRestore,
   UserPlus, GitBranch, Download, X, CalendarRange, FilterX, CheckSquare, ClipboardCheck,
-  SlidersHorizontal, ChevronDown,
+  SlidersHorizontal, ChevronDown, MessageCircle, MessagesSquare,
 } from "lucide-react";
 import type { DbLead } from "@/types/admin";
 import {
@@ -13,6 +13,7 @@ import {
   SOURCE_OPTIONS, ARCHIVE_REASON_OPTIONS, LOSS_REASON_OPTIONS, DATE_PRESET_LABELS,
   followUpUrgency, datePresetRange, leadAgeDays, type DatePreset,
 } from "@/lib/crm-labels";
+import { sanitizeChatUrl } from "@/lib/chat-links";
 
 const PAGE_SIZE = 25;
 
@@ -459,6 +460,8 @@ export default function LeadsTable({ canArchive, canAssign, canExport, canUpdate
                         <div className="text-xs text-slate-400 flex items-center gap-1.5">
                           {lead.lead_code}
                           {lead.needs_review && <span className="text-purple-600" title={lead.review_notes ?? ""}>· مراجعة</span>}
+                          <ChatIcon url={lead.whatsapp_chat_url} label="شات الواتساب" icon={MessageCircle} className="text-green-600 hover:bg-green-50" />
+                          <ChatIcon url={lead.meta_chat_url} label="الشات على Meta" icon={MessagesSquare} className="text-indigo-600 hover:bg-indigo-50" />
                         </div>
                       </td>
                       <td className="px-3 py-3 text-slate-500 whitespace-nowrap" dir="ltr">{lead.mobile_raw || "—"}</td>
@@ -542,6 +545,18 @@ export default function LeadsTable({ canArchive, canAssign, canExport, canUpdate
 }
 
 // ---------- small pieces ----------
+
+/** One-click jump to an existing conversation, straight from the list (opens in a new tab). */
+function ChatIcon({ url, label, icon: Icon, className }: { url?: string | null; label: string; icon: React.ElementType; className: string }) {
+  const href = sanitizeChatUrl(url);
+  if (!href) return null;
+  return (
+    <a href={href} target="_blank" rel="noopener noreferrer" title={label} aria-label={label}
+      className={`inline-flex p-0.5 rounded ${className}`}>
+      <Icon className="w-3.5 h-3.5" />
+    </a>
+  );
+}
 
 function FilterSelect({ label, value, onChange, options }: {
   label: string; value: string; onChange: (v: string) => void; options: [string, string][];

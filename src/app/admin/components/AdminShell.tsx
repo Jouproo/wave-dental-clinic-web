@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Menu, X } from "lucide-react";
 import AdminSidebar from "./AdminSidebar";
+import InstallAppButton from "./InstallApp";
 import type { Role } from "@/lib/permissions";
 
 interface AdminShellSession {
@@ -76,8 +77,11 @@ export default function AdminShell({ children, session }: { children: React.Reac
           >
             <Menu className="w-5 h-5" />
           </button>
-          <span className="font-bold text-blue-700 text-sm">Wave Dental — لوحة التحكم</span>
-          <div className="w-9" />
+          <span className="font-bold text-blue-700 text-sm truncate">Wave Dental</span>
+          {/* Fixed-width slot keeps the title centered whether or not the install button shows */}
+          <div className="min-w-9 flex justify-end">
+            <InstallAppButton variant="topbar" />
+          </div>
         </div>
 
         {children}

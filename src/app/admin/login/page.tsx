@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
+import InstallAppButton from "../components/InstallApp";
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("");
@@ -163,6 +164,8 @@ export default function AdminLoginPage() {
           </button>
         </form>
       </div>
+
+      <InstallAppButton variant="login" />
 
       {/* Footer */}
       <p className="text-white/20 text-xs mt-7 text-center">

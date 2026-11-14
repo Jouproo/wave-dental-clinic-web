@@ -11,6 +11,7 @@ import {
   STAGE_LABELS, CLASSIFICATION_LABELS, CLASSIFICATION_COLORS, QUALIFICATION_LABELS,
   PIPELINE_STAGES, SIDE_TRACK_STAGES, LOSS_REASON_OPTIONS, ARCHIVE_REASON_OPTIONS, leadAgeDays,
 } from "@/lib/crm-labels";
+import ChatLinks from "./ChatLinks";
 
 interface Branch { id: string; name: string }
 interface AssignableUser { id: string; name: string; email: string }
@@ -35,7 +36,7 @@ export default function LeadDetail({
 
   const branchName = branches.find((b) => b.id === lead.branch_id)?.name;
 
-  async function save(patch: Record<string, unknown>) {
+  async function save(patch: Record<string, unknown>): Promise<boolean> {
     setSaving(true);
     setError("");
     setSaved(false);
@@ -49,8 +50,10 @@ export default function LeadDetail({
       if (!res.ok) throw new Error(data.error ?? "فشل الحفظ");
       setSaved(true);
       router.refresh();
+      return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : "حدث خطأ");
+      return false;
     } finally {
       setSaving(false);
     }
@@ -144,12 +147,18 @@ export default function LeadDetail({
               )}
               {whatsappUrl ? (
                 <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 px-4 py-2.5 bg-green-50 text-green-700 rounded-xl text-sm font-semibold hover:bg-green-100">
-                  <MessageCircle className="w-4 h-4" /> واتساب
+                  <MessageCircle className="w-4 h-4" /> رسالة واتساب
                 </a>
               ) : (
                 <span className="text-xs text-amber-600 bg-amber-50 px-3 py-2 rounded-xl self-center">لا يوجد رقم صالح لواتساب</span>
               )}
             </div>
+            <ChatLinks
+              whatsappChatUrl={lead.whatsapp_chat_url ?? null}
+              metaChatUrl={lead.meta_chat_url ?? null}
+              onSave={(patch) => save(patch)}
+              saving={saving}
+            />
             <p className="text-xs text-slate-400 mt-2">فتح واتساب أو الاتصال لا يُسجَّل كمحاولة تواصل تلقائيًا — سجّل نشاط التواصل في قسم المتابعات (قريبًا).</p>
           </div>
 

@@ -16,6 +16,7 @@ export default function NewLeadPage() {
     name: "", mobile_raw: "", source: "", service_interest: "",
     case_size: "", start_timing: "", branch_id: "",
     asked_price: false, opened_messenger: false, conversation_summary: "", notes: "",
+    whatsapp_chat_url: "", meta_chat_url: "",
   });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -115,6 +116,14 @@ export default function NewLeadPage() {
         <Field label="ملخص المحادثة">
           <textarea value={form.conversation_summary} onChange={(e) => field("conversation_summary", e.target.value)} rows={2} className="input resize-none" />
         </Field>
+        <div className="grid sm:grid-cols-2 gap-4">
+          <Field label="لينك شات الواتساب (اختياري)">
+            <input value={form.whatsapp_chat_url} onChange={(e) => field("whatsapp_chat_url", e.target.value)} dir="ltr" placeholder="https://wa.me/…" className="input text-left" />
+          </Field>
+          <Field label="لينك الشات على Meta (اختياري)">
+            <input value={form.meta_chat_url} onChange={(e) => field("meta_chat_url", e.target.value)} dir="ltr" placeholder="https://business.facebook.com/…" className="input text-left" />
+          </Field>
+        </div>
         <Field label="ملاحظات">
           <textarea value={form.notes} onChange={(e) => field("notes", e.target.value)} rows={2} className="input resize-none" />
         </Field>

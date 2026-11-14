@@ -3,6 +3,7 @@ import { getSession, sessionHasPermission } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase";
 import { getLeadForSession, deriveLeadComputedFields } from "@/lib/crm-leads";
 import { ARCHIVE_REASON_OPTIONS } from "@/lib/crm-labels";
+import { sanitizeChatUrl } from "@/lib/chat-links";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession();
@@ -43,6 +44,16 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   ] as const;
   for (const f of DIRECT_FIELDS) {
     if (f in body) update[f] = body[f];
+  }
+
+  // Chat links: empty clears it; anything else must be a safe http(s) link.
+  for (const f of ["whatsapp_chat_url", "meta_chat_url"] as const) {
+    if (!(f in body)) continue;
+    const raw = typeof body[f] === "string" ? body[f].trim() : "";
+    if (!raw) { update[f] = null; continue; }
+    const url = sanitizeChatUrl(raw);
+    if (!url) return NextResponse.json({ error: "اللينك غير صالح — لازم يبدأ بـ https://" }, { status: 400 });
+    update[f] = url;
   }
 
   if (scoringFieldChanged) {

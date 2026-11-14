@@ -3,6 +3,7 @@ import { getSession, sessionHasPermission } from "@/lib/auth";
 import { supabaseServer } from "@/lib/supabase";
 import { resolveScope, applyScope } from "@/lib/crm-scope";
 import { deriveLeadComputedFields, parseLeadFilter, applyLeadFilter } from "@/lib/crm-leads";
+import { sanitizeChatUrl } from "@/lib/chat-links";
 
 const PAGE_SIZE_DEFAULT = 25;
 const PAGE_SIZE_MAX = 100;
@@ -73,6 +74,15 @@ export async function POST(req: NextRequest) {
 
   const supabase = supabaseServer();
 
+  const chatLinks: Record<string, string> = {};
+  for (const f of ["whatsapp_chat_url", "meta_chat_url"] as const) {
+    const raw = typeof body[f] === "string" ? body[f].trim() : "";
+    if (!raw) continue;
+    const url = sanitizeChatUrl(raw);
+    if (!url) return NextResponse.json({ error: "لينك الشات غير صالح — لازم يبدأ بـ https://" }, { status: 400 });
+    chatLinks[f] = url;
+  }
+
   let branchId = body.branch_id || null;
   if (!branchId) {
     const { data: defaultBranch } = await supabase.from("branches").select("id").eq("is_active", true).limit(1).maybeSingle();
@@ -108,6 +118,7 @@ export async function POST(req: NextRequest) {
       assigned_to: assignedTo,
       created_by: session.userId || null,
       updated_by: session.userId || null,
+      ...chatLinks,
     })
     .select()
     .single();

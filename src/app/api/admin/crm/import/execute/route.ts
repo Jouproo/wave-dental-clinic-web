@@ -17,6 +17,7 @@ interface ResultRow { rowNumber: number; legacy_id: string | null; name: string;
 const MERGEABLE_FIELDS = [
   "alt_phone", "whatsapp_raw", "whatsapp_normalized", "source", "campaign_raw", "service_interest",
   "branch_id", "gender", "job_title", "conversation_summary", "legacy_id",
+  "whatsapp_chat_url", "meta_chat_url",
 ] as const;
 
 export async function POST(req: NextRequest) {
@@ -147,6 +148,8 @@ export async function POST(req: NextRequest) {
         last_call_result: r.last_call_result,
         next_follow_up_at: r.next_follow_up_at,
         last_contact_at: r.last_contact_at,
+        whatsapp_chat_url: r.whatsapp_chat_url,
+        meta_chat_url: r.meta_chat_url,
         next_exam_at: r.next_exam_at,
         notes: r.notes,
         created_by: actor,
@@ -161,7 +164,18 @@ export async function POST(req: NextRequest) {
   // ---- insert in chunks; a failing chunk is retried row by row so one bad row can't sink the file ----
   let insertedCount = 0;
   let errorCount = 0;
+  let chatLinksUnsupported = false;
   const inserted: { id: string; stage: string }[] = [];
+
+  // Chat-link columns are optional until crm_chat_links.sql is run — if the DB
+  // doesn't have them yet, drop them rather than failing the whole import.
+  {
+    const { error: colErr } = await supabase.from("leads").select("whatsapp_chat_url, meta_chat_url").limit(1);
+    if (colErr) {
+      for (const c of toInsert) { delete c.record.whatsapp_chat_url; delete c.record.meta_chat_url; }
+      chatLinksUnsupported = true;
+    }
+  }
 
   for (let i = 0; i < toInsert.length; i += INSERT_CHUNK) {
     const chunk = toInsert.slice(i, i + INSERT_CHUNK);
@@ -202,6 +216,7 @@ export async function POST(req: NextRequest) {
     const patch: Record<string, unknown> = { updated_by: actor };
     const filled: string[] = [];
     for (const f of MERGEABLE_FIELDS) {
+      if (chatLinksUnsupported && (f === "whatsapp_chat_url" || f === "meta_chat_url")) continue;
       const incoming = (m.row as unknown as Record<string, unknown>)[f];
       if ((lead[f] === null || lead[f] === "") && incoming !== null && incoming !== undefined && incoming !== "") {
         patch[f] = incoming;
@@ -254,6 +269,7 @@ export async function POST(req: NextRequest) {
       reviewCount,
       errorCount,
       assignedRoundRobin: assignees.length > 0,
+      chatLinksUnsupported,
     },
     results,
   });

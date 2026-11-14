@@ -9,6 +9,7 @@ import {
   LOSS_REASON_OPTIONS, STAGE_LABELS,
 } from "@/lib/crm-labels";
 import type { LeadStage } from "@/types/admin";
+import { sanitizeChatUrl, classifyChatUrl } from "@/lib/chat-links";
 
 // ============================================================
 // Smart spreadsheet import.
@@ -30,7 +31,7 @@ export type ImportField =
   | "case_size" | "start_timing" | "branch" | "gender" | "job_title" | "asked_price"
   | "opened_messenger" | "conversation_summary" | "contact_attempts" | "expected_value"
   | "loss_reason" | "notes" | "stage" | "assignee" | "next_follow_up" | "last_call_result"
-  | "last_contact" | "next_exam";
+  | "last_contact" | "next_exam" | "whatsapp_chat_url" | "meta_chat_url";
 
 interface FieldDef { key: Exclude<ImportField, "skip">; label: string; aliases: string[]; multi?: boolean }
 
@@ -64,6 +65,8 @@ export const IMPORT_FIELDS: FieldDef[] = [
   { key: "last_contact", label: "آخر تواصل", aliases: ["اخر تواصل", "تاريخ اخر تواصل", "اخر مكالمه", "last contact", "last contacted"] },
   { key: "next_exam", label: "موعد الكشف", aliases: ["موعد الكشف", "ميعاد الكشف", "تاريخ الكشف", "exam date", "appointment", "appointment date"] },
   { key: "last_call_result", label: "نتيجة آخر مكالمة", aliases: ["نتيجه المكالمه", "نتيجه اخر مكالمه", "اخر نتيجه", "call result", "last call result"] },
+  { key: "whatsapp_chat_url", label: "لينك شات الواتساب", aliases: ["لينك الواتساب", "لينك الواتس", "رابط الواتساب", "رابط الواتس", "لينك شات الواتساب", "لينك شات الواتس", "رابط شات الواتساب", "شات الواتساب", "شات الواتس", "محادثه الواتساب", "محادثه الواتس", "whatsapp link", "whatsapp chat", "whatsapp chat link", "whatsapp url", "wa link", "wa chat"] },
+  { key: "meta_chat_url", label: "لينك الشات على Meta", aliases: ["لينك الشات", "رابط الشات", "رابط المحادثه", "لينك المحادثه", "لينك ميتا", "رابط ميتا", "لينك الماسنجر", "رابط الماسنجر", "شات الماسنجر", "لينك الانبوكس", "لينك البيزنس سويت", "بيزنس سويت", "ميتا بيزنس", "meta link", "meta chat", "meta chat link", "meta inbox", "inbox link", "business suite", "business suite link", "messenger link", "chat link", "conversation link", "instagram chat"] },
   { key: "notes", label: "ملاحظات", multi: true, aliases: ["ملاحظات", "ملاحظه", "تعليق", "تعليقات", "notes", "note", "comments", "comment", "remarks"] },
 ];
 
@@ -137,6 +140,30 @@ function sheetGrid(wb: XLSX.WorkBook, sheetName: string): unknown[][] {
   const sheet = wb.Sheets[sheetName];
   if (!sheet) return [];
   return XLSX.utils.sheet_to_json(sheet, { header: 1, defval: null, raw: true, blankrows: true });
+}
+
+/**
+ * Hyperlinks hidden behind display text ("فتح الشات" → https://…), keyed by
+ * grid position. Covers both Excel link cells and =HYPERLINK("url","text").
+ */
+function sheetLinks(wb: XLSX.WorkBook, sheetName: string): Map<string, string> {
+  const sheet = wb.Sheets[sheetName];
+  const links = new Map<string, string>();
+  if (!sheet || !sheet["!ref"]) return links;
+  const origin = XLSX.utils.decode_range(sheet["!ref"]).s;
+  for (const addr of Object.keys(sheet)) {
+    if (addr.startsWith("!")) continue;
+    const cell = sheet[addr] as XLSX.CellObject;
+    let target = cell.l?.Target ?? null;
+    if (!target && typeof cell.f === "string") {
+      const m = cell.f.match(/^HYPERLINK\(\s*"([^"]+)"/i);
+      if (m) target = m[1];
+    }
+    if (!target) continue;
+    const { r, c } = XLSX.utils.decode_cell(addr);
+    links.set(`${r - origin.r},${c - origin.c}`, target);
+  }
+  return links;
 }
 
 /** Score a candidate header row: how many cells are recognisable column names. */
@@ -382,6 +409,8 @@ export interface ParsedLeadRow {
   next_exam_at: string | null;
   last_call_result: string | null;
   notes: string | null;
+  whatsapp_chat_url: string | null;
+  meta_chat_url: string | null;
 
   // Computed server-side — never trusts a sheet's own Score/التصنيف/مؤهل؟ columns.
   mobile_normalized: string | null;
@@ -416,6 +445,10 @@ export function parseLeadsWorkbook(wb: XLSX.WorkBook, ctx: ImportContext, opts: 
   const detected = detectSheet(wb, opts.sheetName);
   const sheetName = detected.sheetName;
   const grid = sheetGrid(wb, sheetName);
+  const links = sheetLinks(wb, sheetName);
+  /** A cell's real URL: the hyperlink target if there is one, else its text — only if it's a safe web link. */
+  const cellUrl = (r: number, i: number): string | null =>
+    sanitizeChatUrl(links.get(`${r},${i}`) ?? cellToString(grid[r]?.[i]));
   const headerRowIndex = opts.headerRowIndex !== undefined && opts.headerRowIndex >= 0 && opts.headerRowIndex < grid.length
     ? opts.headerRowIndex
     : detected.headerRowIndex;
@@ -423,12 +456,38 @@ export function parseLeadsWorkbook(wb: XLSX.WorkBook, ctx: ImportContext, opts: 
   const headerRow = grid[headerRowIndex] ?? [];
   const width = Math.max(headerRow.length, ...grid.slice(headerRowIndex + 1, headerRowIndex + 50).map((r) => r?.length ?? 0));
   const headers: (string | null)[] = Array.from({ length: width }, (_, i) => cellToString(headerRow[i]));
-  const mapping: ColumnMapping = opts.mapping && Object.keys(opts.mapping).length ? opts.mapping : autoMapColumns(headers);
+  const userMapped = Boolean(opts.mapping && Object.keys(opts.mapping).length);
+  const mapping: ColumnMapping = userMapped ? opts.mapping! : autoMapColumns(headers);
+
+  // Content-based detection: a column that is mostly links is a chat-link
+  // column whatever its header says (e.g. a "واتساب" column holding wa.me links),
+  // routed by the links' domain. Never overrides a mapping the user chose.
+  if (!userMapped) {
+    const taken = new Set(Object.values(mapping));
+    for (let i = 0; i < headers.length; i++) {
+      const kinds: Record<string, number> = {};
+      let filled = 0;
+      for (let r = headerRowIndex + 1; r < grid.length && filled < 30; r++) {
+        if (!cellToString(grid[r]?.[i]) && !links.has(`${r},${i}`)) continue;
+        filled++;
+        const url = cellUrl(r, i);
+        const kind = url ? classifyChatUrl(url) : null;
+        if (kind) kinds[kind] = (kinds[kind] ?? 0) + 1;
+      }
+      for (const [kind, n] of Object.entries(kinds)) {
+        const field: ImportField = kind === "whatsapp" ? "whatsapp_chat_url" : "meta_chat_url";
+        if (filled > 0 && n / filled >= 0.5 && (mapping[i] === field || !taken.has(field))) {
+          mapping[i] = field;
+          taken.add(field);
+        }
+      }
+    }
+  }
 
   const columns: ColumnInfo[] = headers.map((h, i) => {
     const samples: string[] = [];
     for (let r = headerRowIndex + 1; r < grid.length && samples.length < 3; r++) {
-      const s = cellToString(grid[r]?.[i]);
+      const s = links.get(`${r},${i}`) ?? cellToString(grid[r]?.[i]);
       if (s) samples.push(s.length > 40 ? s.slice(0, 40) + "…" : s);
     }
     return { index: i, header: h ?? `عمود ${XLSX.utils.encode_col(i)}`, samples, field: mapping[i] ?? "skip" };
@@ -466,8 +525,32 @@ export function parseLeadsWorkbook(wb: XLSX.WorkBook, ctx: ImportContext, opts: 
 
     const review: string[] = [];
 
+    // --- chat links (hyperlink target or plain text; only safe http(s) links are kept) ---
+    const chatLink = (f: ImportField): string | null => {
+      for (const i of colsFor(f)) {
+        const raw = links.get(`${r},${i}`) ?? cellToString(row[i]);
+        if (!raw) continue;
+        const url = sanitizeChatUrl(raw);
+        if (url) return url;
+        review.push(`لينك غير صالح في عمود "${headers[i] ?? ""}" — اتجاهل`);
+      }
+      return null;
+    };
+    const whatsapp_chat_url = chatLink("whatsapp_chat_url");
+    const meta_chat_url = chatLink("meta_chat_url");
+    // wa.me/2010… and api.whatsapp.com/send?phone=… carry the number itself.
+    let waLinkPhone: string | null = null;
+    if (whatsapp_chat_url) {
+      const u = new URL(whatsapp_chat_url);
+      waLinkPhone = (u.hostname.endsWith("wa.me") ? u.pathname.slice(1) : u.searchParams.get("phone")) || null;
+      if (waLinkPhone && !/^\+?\d{10,15}$/.test(waLinkPhone)) waLinkPhone = null;
+    }
+
     // --- phones (a cell may hold several numbers: "010… / 011…") ---
-    const phoneCandidates = [...colsFor("mobile"), ...colsFor("whatsapp"), ...colsFor("alt_phone")].flatMap((i) => splitPhones(row[i]));
+    const phoneCandidates = [
+      ...[...colsFor("mobile"), ...colsFor("whatsapp"), ...colsFor("alt_phone")].flatMap((i) => splitPhones(row[i])),
+      ...(waLinkPhone ? [waLinkPhone] : []),
+    ];
     const mobileCells = colsFor("mobile").flatMap((i) => splitPhones(row[i]));
     const valid = phoneCandidates.map((p) => ({ raw: p, n: normalizeEgyptianPhone(p) }));
     const primary = valid.find((p) => mobileCells.includes(p.raw) && p.n.valid) ?? valid.find((p) => p.n.valid) ?? (mobileCells[0] ? valid.find((p) => p.raw === mobileCells[0]) : valid[0]);
@@ -616,6 +699,8 @@ export function parseLeadsWorkbook(wb: XLSX.WorkBook, ctx: ImportContext, opts: 
       next_exam_at,
       last_call_result: str("last_call_result"),
       notes: noteParts.length ? noteParts.join("\n") : null,
+      whatsapp_chat_url,
+      meta_chat_url,
       mobile_normalized: phone.normalized,
       whatsapp_normalized: wa?.normalized ?? null,
       lead_score: score,

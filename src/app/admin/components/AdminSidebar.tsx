@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import InstallAppButton from "./InstallApp";
 import { Home, Image, UserRound, Stethoscope, LogOut, Settings, Users, ExternalLink, Newspaper, CalendarCheck, Briefcase } from "lucide-react";
 import { clsx } from "clsx";
 import type { Role } from "@/lib/permissions";
@@ -81,6 +82,7 @@ export default function AdminSidebar({ role }: { role: Role }) {
 
       {/* View site + Logout */}
       <div className="px-3 py-4 border-t border-gray-100 space-y-1">
+        <InstallAppButton variant="sidebar" />
         <a
           href="/"
           target="_blank"
