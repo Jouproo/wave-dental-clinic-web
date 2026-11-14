@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import {
   Phone, MessageCircle, User, Flame, Loader2, CheckCircle2, ArrowRight,
   Calendar, Briefcase, MapPin, FileText, Archive, ArchiveRestore, ClipboardCheck,
+  VenusAndMars, Megaphone, Wallet, PhoneCall, CalendarCheck, Stethoscope,
 } from "lucide-react";
 import type { DbLead } from "@/types/admin";
 import {
@@ -124,11 +125,30 @@ export default function LeadDetail({
 
             <div className="grid sm:grid-cols-2 gap-3 text-sm">
               <InfoRow icon={User} label="التأهيل">{QUALIFICATION_LABELS[lead.qualification_status]}</InfoRow>
-              {lead.service_interest && <InfoRow icon={Briefcase} label="الخدمة">{lead.service_interest}</InfoRow>}
+              {lead.service_interest && <InfoRow icon={Stethoscope} label="الخدمة">{lead.service_interest}</InfoRow>}
               {branchName && <InfoRow icon={MapPin} label="الفرع">{branchName}</InfoRow>}
               {lead.source && <InfoRow icon={FileText} label="المصدر">{lead.source}</InfoRow>}
+              {lead.campaign_raw && <InfoRow icon={Megaphone} label="الحملة">{lead.campaign_raw}</InfoRow>}
               {lead.case_size && <InfoRow icon={FileText} label="حجم الحالة">{lead.case_size}</InfoRow>}
               {lead.start_timing && <InfoRow icon={Calendar} label="موعد البدء">{lead.start_timing}</InfoRow>}
+              {lead.job_title && <InfoRow icon={Briefcase} label="الوظيفة">{lead.job_title}</InfoRow>}
+              {lead.gender && <InfoRow icon={VenusAndMars} label="النوع">{lead.gender}</InfoRow>}
+              {lead.alt_phone && <InfoRow icon={Phone} label="رقم بديل"><span dir="ltr">{lead.alt_phone}</span></InfoRow>}
+              {lead.whatsapp_raw && lead.whatsapp_raw !== lead.mobile_raw && (
+                <InfoRow icon={MessageCircle} label="رقم الواتساب"><span dir="ltr">{lead.whatsapp_raw}</span></InfoRow>
+              )}
+              {lead.asked_price && <InfoRow icon={Wallet} label="سأل عن السعر">نعم</InfoRow>}
+              {lead.expected_value_egp != null && (
+                <InfoRow icon={Wallet} label="القيمة المتوقعة">{Number(lead.expected_value_egp).toLocaleString("ar-EG")} ج</InfoRow>
+              )}
+              {lead.contact_attempts > 0 && <InfoRow icon={PhoneCall} label="عدد محاولات التواصل">{lead.contact_attempts}</InfoRow>}
+              {lead.last_call_result && <InfoRow icon={PhoneCall} label="نتيجة آخر مكالمة">{lead.last_call_result}</InfoRow>}
+              {lead.next_exam_at && (
+                <InfoRow icon={CalendarCheck} label="موعد الكشف">{new Date(lead.next_exam_at).toLocaleDateString("ar-EG")}</InfoRow>
+              )}
+              {lead.stage === "lost" && lead.loss_reason && (
+                <InfoRow icon={FileText} label="سبب الخسارة">{lead.loss_reason}{lead.loss_reason_other ? ` — ${lead.loss_reason_other}` : ""}</InfoRow>
+              )}
             </div>
 
             {lead.conversation_summary && (

@@ -727,6 +727,12 @@ export function parseLeadsWorkbook(wb: XLSX.WorkBook, ctx: ImportContext, opts: 
 
     const legacy_id = str("legacy_id");
     const campaign_raw = str("campaign") ?? (opts.campaign || null);
+    // No service column but the campaign says it ("Dental Implants | Leads | Sep") → infer it.
+    // Only a specific service counts; a vague match ("غير محدد") is not worth guessing.
+    if (!service_interest && !serviceRaw && campaign_raw) {
+      const inferred = matchRules(campaign_raw, SERVICE_INTEREST_OPTIONS, SERVICE_RULES);
+      if (inferred && inferred !== "غير محدد") service_interest = inferred;
+    }
 
     const { score, classification, breakdown } = computeLeadScore(
       { case_size, start_timing, asked_price: askedPrice, opened_messenger: openedMessenger, has_valid_phone: phone.valid },
